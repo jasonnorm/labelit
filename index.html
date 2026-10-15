@@ -1,0 +1,1172 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>LabelIt – Slab Label Maker</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Arimo:wght@400;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+:root {
+  --bg: #f4f5f7;
+  --panel: #ffffff;
+  --ink: #16181d;
+  --muted: #646b78;
+  --line: #e2e5ea;
+  --accent: #e10600;
+  --accent-ink: #ffffff;
+  --focus: #1a57d6;
+  --radius: 12px;
+  --stage: #e9ebef;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #111317;
+    --panel: #1a1d23;
+    --ink: #eceef2;
+    --muted: #9aa1ad;
+    --line: #2b2f37;
+    --stage: #0c0d10;
+    --focus: #6d9bff;
+  }
+}
+
+* { box-sizing: border-box; }
+html, body { margin: 0; }
+body {
+  font-family: "Inter", system-ui, -apple-system, Segoe UI, sans-serif;
+  background: var(--bg);
+  color: var(--ink);
+  line-height: 1.4;
+}
+
+.app-header {
+  padding: 20px 24px;
+  border-bottom: 1px solid var(--line);
+  background: var(--panel);
+}
+.brand { display: flex; align-items: center; gap: 14px; max-width: 1240px; margin: 0 auto; }
+.brand-mark {
+  width: 44px; height: 14px; border-radius: 3px;
+  background: #fff; border: 4px solid var(--accent); box-sizing: content-box;
+}
+.brand h1 { margin: 0; font-size: 1.25rem; letter-spacing: -0.01em; }
+.brand p { margin: 0; color: var(--muted); font-size: 0.875rem; }
+
+.layout {
+  display: grid;
+  grid-template-columns: minmax(300px, 400px) 1fr;
+  gap: 24px;
+  max-width: 1240px;
+  margin: 24px auto;
+  padding: 0 24px;
+  align-items: start;
+}
+.panel {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 20px;
+}
+.preview-panel { position: sticky; top: 24px; }
+
+fieldset { border: 0; padding: 0; margin: 0 0 22px; }
+legend {
+  font-weight: 600; font-size: 0.8125rem; text-transform: uppercase;
+  letter-spacing: 0.06em; color: var(--muted); margin-bottom: 10px; padding: 0;
+}
+legend small { text-transform: none; letter-spacing: 0; font-weight: 400; }
+
+.field { display: block; margin-bottom: 12px; }
+.field > span { display: block; font-size: 0.875rem; font-weight: 500; margin-bottom: 4px; }
+.row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+input[type="text"], input[type="url"], input[type="number"], select {
+  width: 100%;
+  font: inherit;
+  font-size: 0.9375rem;
+  padding: 9px 11px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--bg);
+  color: var(--ink);
+}
+input:focus, select:focus, button:focus-visible, .file-btn:focus-within {
+  outline: 2px solid var(--focus);
+  outline-offset: 1px;
+}
+input.invalid { border-color: #d93025; background: color-mix(in srgb, #d93025 8%, var(--bg)); }
+
+.check { display: flex; align-items: center; gap: 8px; font-size: 0.875rem; cursor: pointer; }
+.check input { width: 16px; height: 16px; accent-color: var(--focus); }
+
+.color-row { display: flex; gap: 10px; align-items: center; }
+.color-input {
+  width: 48px; height: 40px; padding: 0; border: 1px solid var(--line);
+  border-radius: 8px; background: none; cursor: pointer;
+}
+.color-input::-webkit-color-swatch-wrapper { padding: 3px; }
+.color-input::-webkit-color-swatch { border: 0; border-radius: 5px; }
+.hex-input { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; text-transform: uppercase; max-width: 130px; }
+.swatches { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+.text-color { margin: 14px 0 12px; }
+select.effect { width: 100%; }
+.swatch {
+  width: 26px; height: 26px; border-radius: 50%;
+  border: 2px solid var(--panel); box-shadow: 0 0 0 1px var(--line);
+  cursor: pointer; padding: 0;
+}
+.swatch[aria-pressed="true"] { box-shadow: 0 0 0 2px var(--ink); }
+
+.hint { color: var(--muted); font-size: 0.8125rem; margin: 4px 0 0; }
+
+.logo-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.file-btn {
+  position: relative; display: inline-flex; align-items: center;
+  padding: 8px 14px; border-radius: 8px; border: 1px solid var(--line);
+  background: var(--bg); font-size: 0.875rem; font-weight: 500; cursor: pointer;
+}
+.file-btn input { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
+.logo-name { font-size: 0.8125rem; color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 180px; }
+
+button { font: inherit; cursor: pointer; }
+.btn-primary, .btn-secondary, .btn-ghost {
+  border-radius: 8px; padding: 10px 16px; font-weight: 600; font-size: 0.9375rem; border: 1px solid transparent;
+}
+.btn-primary { background: var(--ink); color: var(--panel); }
+.btn-primary:hover { opacity: 0.88; }
+.btn-secondary { background: var(--bg); color: var(--ink); border-color: var(--line); }
+.btn-secondary:hover { border-color: var(--muted); }
+.btn-ghost { background: none; color: var(--muted); padding: 6px 10px; font-weight: 500; font-size: 0.875rem; }
+.btn-ghost:hover { color: var(--ink); }
+.reset { padding-left: 0; }
+
+.preview-head { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 12px; }
+.preview-head h2 { margin: 0; font-size: 1rem; }
+.dims { color: var(--muted); font-size: 0.8125rem; }
+.preview-stage {
+  background: var(--stage);
+  border-radius: 10px;
+  padding: clamp(16px, 5vw, 48px);
+  display: flex; justify-content: center;
+}
+#label-canvas {
+  width: 100%;
+  max-width: 760px;
+  aspect-ratio: 2.5 / 0.75;
+  height: auto;
+  display: block;
+  box-shadow: 0 1px 2px rgba(0,0,0,.12), 0 8px 24px rgba(0,0,0,.12);
+}
+
+.export { margin-top: 18px; display: grid; gap: 12px; }
+.export .btn-primary { justify-self: start; }
+.print-group { display: flex; gap: 10px; align-items: end; flex-wrap: wrap; }
+.print-group select { width: auto; flex: 1 1 200px; }
+.copies { display: flex; align-items: center; gap: 6px; font-size: 0.875rem; }
+.copies input { width: 70px; }
+#label-canvas.double { aspect-ratio: 2.5 / 1.5; max-width: 560px; }
+.double-check { font-weight: 500; }
+.back-side { margin: 0; }
+
+.size-field > span { display: flex; justify-content: space-between; }
+.size-field output { color: var(--muted); font-variant-numeric: tabular-nums; }
+input[type="range"] { width: 100%; accent-color: var(--focus); }
+.size-field + .hint { margin: -6px 0 12px; }
+.logo-size { margin: 14px 0 0; }
+.logo-pos { margin: 14px 0 0; }
+.segmented { display: inline-flex; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; background: var(--bg); }
+.segmented label { position: relative; cursor: pointer; }
+.segmented input { position: absolute; opacity: 0; inset: 0; cursor: pointer; }
+.segmented span { display: block; padding: 7px 16px; font-size: 0.875rem; font-weight: 500; color: var(--muted); }
+.segmented label + label span { border-left: 1px solid var(--line); }
+.segmented input:checked + span { background: var(--ink); color: var(--panel); }
+.segmented input:focus-visible + span { outline: 2px solid var(--focus); outline-offset: -2px; }
+
+#print-area { display: none; }
+
+@media (max-width: 860px) {
+  .layout { grid-template-columns: 1fr; padding: 0 16px; margin: 16px auto; }
+  .preview-panel { position: static; order: -1; }
+  .app-header { padding: 16px; }
+}
+
+/* ---------- print ---------- */
+@media print {
+  body { background: #fff; }
+  .app-header, .layout { display: none !important; }
+  #print-area { display: block; }
+  #print-area .cell { position: relative; width: 2.5in; height: 0.75in; }
+  #print-area.double .cell { height: 1.5in; }
+  #print-area img { display: block; width: 100%; height: 100%; }
+  * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+
+  .print-label .cell { break-after: page; }
+  .print-label .cell:last-child { break-after: auto; }
+
+  .print-sheet {
+    display: grid !important;
+    grid-template-columns: repeat(3, 2.5in);
+    grid-auto-rows: 0.75in;
+    gap: 0.125in;
+  }
+  .print-sheet.double { grid-auto-rows: 1.5in; }
+  .print-sheet img { outline: 0.5pt dashed #999; outline-offset: 0; }
+  /* Fold marks: short ticks just outside the left and right edges at the fold line */
+  .print-sheet.double .cell::before, .print-sheet.double .cell::after {
+    content: ""; position: absolute; top: 50%; width: 0.08in; border-top: 0.5pt solid #666;
+  }
+  .print-sheet.double .cell::before { left: -0.1in; }
+  .print-sheet.double .cell::after { right: -0.1in; }
+}
+</style>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
+</head>
+<body>
+  <header class="app-header">
+    <div class="brand">
+      <span class="brand-mark" aria-hidden="true"></span>
+      <div>
+        <h1>LabelIt</h1>
+        <p>Custom slab labels for Zion SlabMag cases · 2.5″ × 0.75″</p>
+      </div>
+    </div>
+  </header>
+
+  <main class="layout">
+    <section class="panel form-panel" aria-label="Label details">
+      <form id="label-form" autocomplete="off">
+        <fieldset>
+          <legend>Card details</legend>
+
+          <label class="field">
+            <span>1. Year &amp; Set</span>
+            <input name="yearSet" type="text" placeholder="2026 Topps Chrome" maxlength="60" />
+          </label>
+
+          <label class="field">
+            <span>2. Player name</span>
+            <input name="player" type="text" placeholder="Shohei Ohtani" maxlength="60" />
+          </label>
+
+          <label class="field">
+            <span>3. Parallel / Description</span>
+            <input name="parallel" type="text" placeholder="Gold Refractor" maxlength="60" />
+          </label>
+
+          <div class="row">
+            <label class="field">
+              <span>4. Card #</span>
+              <input name="cardNo" type="text" placeholder="#150" maxlength="16" />
+            </label>
+            <label class="field">
+              <span>5. Serial #</span>
+              <input name="serial" type="text" placeholder="125/150" maxlength="16" />
+            </label>
+          </div>
+
+          <label class="field size-field">
+            <span>Text size <output id="font-size-out">75%</output></span>
+            <input name="fontScale" type="range" min="50" max="100" step="5" value="75" aria-describedby="font-size-hint" />
+          </label>
+          <p class="hint" id="font-size-hint">Long text still shrinks automatically to fit.</p>
+
+          <div class="field">
+            <span>Text weight</span>
+            <div class="segmented" role="radiogroup" aria-label="Text weight">
+              <label><input type="radio" name="fontWeight" value="400" checked /><span>Normal</span></label>
+              <label><input type="radio" name="fontWeight" value="700" /><span style="font-weight:700">Bold</span></label>
+            </div>
+          </div>
+
+          <div class="field text-color">
+            <span>Text color</span>
+            <div class="color-row">
+              <input id="text-color-picker" class="color-input" type="color" value="#111111" aria-label="Text color picker" />
+              <input name="textColor" id="text-color-hex" class="hex-input" type="text" value="#111111" maxlength="7" spellcheck="false" aria-label="Text color hex value" />
+            </div>
+            <div class="swatches" id="text-swatches" role="list" aria-label="Preset text colors"></div>
+          </div>
+
+          <label class="check">
+            <input name="allCaps" type="checkbox" checked />
+            <span>ALL CAPS text</span>
+          </label>
+        </fieldset>
+
+        <fieldset>
+          <legend>6. Border</legend>
+          <div class="color-row">
+            <input id="color-picker" class="color-input" type="color" value="#e10600" aria-label="Border color picker" />
+            <input name="borderColor" id="color-hex" class="hex-input" type="text" value="#E10600" maxlength="7" spellcheck="false" aria-label="Border color hex value" />
+          </div>
+          <div class="swatches" id="swatches" role="list" aria-label="Preset colors"></div>
+          <label class="field size-field logo-size">
+            <span>Thickness <output id="border-out">0.080″</output></span>
+            <input name="border" type="range" min="20" max="80" step="5" value="80" aria-label="Border thickness in thousandths of an inch" />
+          </label>
+        </fieldset>
+
+        <fieldset>
+          <legend>7. QR code <small>(optional)</small></legend>
+          <label class="field">
+            <span>URL</span>
+            <input name="qrUrl" type="url" placeholder="https://example.com/my-card" />
+          </label>
+          <p class="hint">Leave blank for no QR code. Shorter URLs scan more reliably at this size.</p>
+        </fieldset>
+
+        <fieldset>
+          <legend>8. Logo / image <small>(optional)</small></legend>
+          <div class="logo-row">
+            <label class="file-btn">
+              <input id="logo-input" type="file" accept="image/*" />
+              <span>Upload image</span>
+            </label>
+            <button type="button" class="btn-ghost" id="logo-clear" hidden>Remove</button>
+            <span class="logo-name" id="logo-name">No image</span>
+          </div>
+          <div class="field logo-pos">
+            <span>Position</span>
+            <div class="segmented" role="radiogroup" aria-label="Logo position">
+              <label><input type="radio" name="logoPos" value="left" /><span>Left</span></label>
+              <label><input type="radio" name="logoPos" value="center" checked /><span>Center</span></label>
+              <label><input type="radio" name="logoPos" value="right" /><span>Right</span></label>
+            </div>
+          </div>
+          <label class="field size-field logo-size">
+            <span>Logo size <output id="logo-size-out">100%</output></span>
+            <input name="logoScale" type="range" min="50" max="200" step="10" value="100" />
+          </label>
+          <label class="field logo-size">
+            <span>Effect</span>
+            <select name="logoEffect" class="effect">
+              <option value="none">None</option>
+              <option value="bw">Black &amp; white</option>
+              <option value="sepia">Sepia</option>
+              <option value="vintage">Vintage</option>
+              <option value="contrast">High-contrast B&amp;W</option>
+              <option value="warm">Warm</option>
+              <option value="cool">Cool</option>
+              <option value="tint">Tint (border color)</option>
+              <option value="invert">Invert</option>
+            </select>
+          </label>
+          <p class="hint">Blank margins around the image are trimmed automatically. Center sits on the bottom border; left and right get their own column.</p>
+        </fieldset>
+
+        <fieldset>
+          <legend>9. Background image <small>(optional)</small></legend>
+          <div class="logo-row">
+            <label class="file-btn">
+              <input id="bg-input" type="file" accept="image/*" />
+              <span>Upload background</span>
+            </label>
+            <button type="button" class="btn-ghost" id="bg-clear" hidden>Remove</button>
+            <span class="logo-name" id="bg-name">No image</span>
+          </div>
+          <label class="field size-field logo-size">
+            <span>Opacity <output id="bg-opacity-out">35%</output></span>
+            <input name="bgOpacity" type="range" min="5" max="100" step="5" value="35" />
+          </label>
+          <label class="field logo-size">
+            <span>Effect</span>
+            <select name="bgEffect" class="effect">
+              <option value="none">None</option>
+              <option value="bw">Black &amp; white</option>
+              <option value="sepia">Sepia</option>
+              <option value="vintage">Vintage</option>
+              <option value="contrast">High-contrast B&amp;W</option>
+              <option value="warm">Warm</option>
+              <option value="cool">Cool</option>
+              <option value="tint">Tint (border color)</option>
+              <option value="invert">Invert</option>
+            </select>
+          </label>
+          <p class="hint">The image is resized and center-cropped to fill the white area. Lower opacity keeps the text readable.</p>
+        </fieldset>
+
+        <button type="button" class="btn-ghost reset" id="reset">Reset all fields</button>
+      </form>
+    </section>
+
+    <section class="panel preview-panel" aria-label="Preview and export">
+      <div class="preview-head">
+        <h2>Preview</h2>
+        <span class="dims" id="dims">2.5″ × 0.75″ · 600 DPI</span>
+      </div>
+      <div class="preview-stage">
+        <canvas id="label-canvas" aria-label="Label preview"></canvas>
+      </div>
+
+      <div class="export">
+        <label class="check double-check">
+          <input id="double" type="checkbox" />
+          <span>Double-sided (fold in half)</span>
+        </label>
+        <div class="field back-side" id="back-side" hidden>
+          <span>Back side</span>
+          <div class="segmented" role="radiogroup" aria-label="Back side">
+            <label><input type="radio" name="backMode" value="same" checked /><span>Same as front</span></label>
+            <label><input type="radio" name="backMode" value="qr" /><span>QR code only</span></label>
+          </div>
+        </div>
+        <p class="hint" id="double-hint" hidden>Prints the label twice, joined along the fold line, with the top copy rotated 180°. Cut around the outside, fold back along the middle, and both sides read upright when you turn the slab over.</p>
+        <button type="button" class="btn-primary" id="download">Download PNG</button>
+        <div class="print-group">
+          <select id="print-mode" aria-label="Print layout">
+            <option value="sheet">Letter sheet (cut lines)</option>
+            <option value="label" id="label-printer-opt">Label printer (2.5″×0.75″)</option>
+          </select>
+          <label class="copies">
+            <span>Copies</span>
+            <input id="copies" type="number" min="1" max="36" value="1" />
+          </label>
+          <button type="button" class="btn-secondary" id="print">Print</button>
+        </div>
+        <p class="hint">Print at <strong>100% / Actual size</strong> (turn off “Fit to page”) so the label comes out exactly 2.5″ × 0.75″.</p>
+      </div>
+    </section>
+  </main>
+
+  <div id="print-area" aria-hidden="true"></div>
+  <style id="print-page-style"></style>
+
+  <script>
+/*
+ * Slab label renderer.
+ * All geometry is expressed in inches and converted to pixels at render time,
+ * so the on-screen preview, PNG export and printouts share one layout.
+ */
+(function (global) {
+  'use strict';
+
+  const SPEC = {
+    width: 2.5,
+    height: 0.75,
+    border: 0.08,          // colored frame thickness (default and maximum)
+    minBorder: 0.02,
+    innerRadius: 0.025,    // rounded corners of the white panel
+    padX: 0.05,            // text inset from the white panel edge
+    fontFamily: '"Arimo", Arial, Helvetica, sans-serif',
+    fontSize: 0.14,        // ~10pt; shrinks uniformly when text is long
+    minFontSize: 0.07,
+    baselines: [0.205, 0.365, 0.525], // year/set, player, parallel
+    rightGap: 0.08,        // min gap between left text and right column
+    qrInset: 0.035,
+    qrGap: 0.05,
+    logoBox: { width: 0.62, height: 0.16, top: 0.585 }, // center: straddles bottom border
+    logoSide: { width: 0.45, height: 0.32 },            // left/right: own column in the panel
+    textColor: '#111111',
+  };
+
+  function font(weight, sizeIn, k) {
+    return `${weight} ${sizeIn * k}px ${SPEC.fontFamily}`;
+  }
+
+  function roundRect(ctx, x, y, w, h, r) {
+    ctx.beginPath();
+    ctx.moveTo(x + r, y);
+    ctx.arcTo(x + w, y, x + w, y + h, r);
+    ctx.arcTo(x + w, y + h, x, y + h, r);
+    ctx.arcTo(x, y + h, x, y, r);
+    ctx.arcTo(x, y, x + w, y, r);
+    ctx.closePath();
+  }
+
+  // Image effects are done per pixel (not ctx.filter) so they work in every browser.
+  const effectCache = new WeakMap();
+  function hexToRgb(hex) {
+    const n = parseInt((hex || '#000000').slice(1), 16);
+    return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
+  }
+  function applyEffect(img, effect, tintHex) {
+    if (!img || !effect || effect === 'none') return img;
+    const key = effect + tintHex;
+    const hit = effectCache.get(img);
+    if (hit && hit.key === key) return hit.canvas;
+    const c = document.createElement('canvas');
+    c.width = img.naturalWidth || img.width;
+    c.height = img.naturalHeight || img.height;
+    const x = c.getContext('2d');
+    x.drawImage(img, 0, 0);
+    let px;
+    try { px = x.getImageData(0, 0, c.width, c.height); } catch (e) { return img; }
+    const d = px.data;
+    const tint = hexToRgb(tintHex);
+    const clamp = (v) => (v < 0 ? 0 : v > 255 ? 255 : v);
+    for (let i = 0; i < d.length; i += 4) {
+      const r = d[i], g = d[i + 1], b = d[i + 2];
+      const lum = 0.299 * r + 0.587 * g + 0.114 * b;
+      let nr = r, ng = g, nb = b;
+      switch (effect) {
+        case 'bw': nr = ng = nb = lum; break;
+        case 'contrast': nr = ng = nb = clamp((lum - 128) * 1.8 + 128); break;
+        case 'sepia':
+          nr = 0.393 * r + 0.769 * g + 0.189 * b;
+          ng = 0.349 * r + 0.686 * g + 0.168 * b;
+          nb = 0.272 * r + 0.534 * g + 0.131 * b;
+          break;
+        case 'vintage': {
+          const sr = 0.393 * r + 0.769 * g + 0.189 * b;
+          const sg = 0.349 * r + 0.686 * g + 0.168 * b;
+          const sb = 0.272 * r + 0.534 * g + 0.131 * b;
+          // Half sepia, lowered contrast and lifted blacks for a faded print look
+          nr = ((r + sr) / 2 - 128) * 0.8 + 140;
+          ng = ((g + sg) / 2 - 128) * 0.8 + 132;
+          nb = ((b + sb) / 2 - 128) * 0.8 + 112;
+          break;
+        }
+        case 'warm': nr = r * 1.1 + 10; ng = g * 1.02; nb = b * 0.85; break;
+        case 'cool': nr = r * 0.85; ng = g * 1.02; nb = b * 1.12 + 10; break;
+        case 'tint': {
+          // Duotone: dark areas take the border color, light areas stay white
+          const t = lum / 255;
+          nr = tint[0] + (255 - tint[0]) * t;
+          ng = tint[1] + (255 - tint[1]) * t;
+          nb = tint[2] + (255 - tint[2]) * t;
+          break;
+        }
+        case 'invert': nr = 255 - r; ng = 255 - g; nb = 255 - b; break;
+      }
+      d[i] = clamp(nr); d[i + 1] = clamp(ng); d[i + 2] = clamp(nb);
+    }
+    x.putImageData(px, 0, 0);
+    effectCache.set(img, { key, canvas: c });
+    return c;
+  }
+
+  function buildQr(text) {
+    if (!text || typeof global.qrcode !== 'function') return null;
+    try {
+      const qr = global.qrcode(0, 'L');
+      qr.addData(text);
+      qr.make();
+      return qr;
+    } catch (e) {
+      return null; // data too long
+    }
+  }
+
+  function drawQr(ctx, qr, xPx, yPx, sizePx) {
+    const n = qr.getModuleCount();
+    const quiet = 1; // modules; the white panel supplies the rest of the quiet zone
+    const total = n + quiet * 2;
+    const mod = Math.floor(sizePx / total);
+    const drawn = mod * total;
+    const ox = Math.round(xPx + (sizePx - drawn) / 2) + quiet * mod;
+    const oy = Math.round(yPx + (sizePx - drawn) / 2) + quiet * mod;
+    // Solid white quiet zone so the code still scans over a background image
+    ctx.fillStyle = '#fff';
+    ctx.fillRect(ox - quiet * mod, oy - quiet * mod, drawn, drawn);
+    ctx.fillStyle = '#000';
+    for (let r = 0; r < n; r++) {
+      for (let c = 0; c < n; c++) {
+        if (qr.isDark(r, c)) ctx.fillRect(ox + c * mod, oy + r * mod, mod, mod);
+      }
+    }
+  }
+
+  /**
+   * Render a label.
+   * @param {HTMLCanvasElement} canvas
+   * @param {object} data  { yearSet, player, parallel, cardNo, serial, borderColor, qrUrl, allCaps,
+   *                         fontScale, logo, logoScale, logoPos ('left'|'center'|'right'), bg, bgOpacity }
+   * @param {number} dpi
+   * @returns {{qrTooLong: boolean}}
+   */
+  function render(canvas, data, dpi) {
+    const k = dpi;
+    const W = Math.round(SPEC.width * k);
+    const H = Math.round(SPEC.height * k);
+    canvas.width = W;
+    canvas.height = H;
+    const ctx = canvas.getContext('2d');
+    const weight = Number(data.fontWeight) === 700 ? 700 : 400; // one weight for all label text
+    const tx = (s) => (data.allCaps ? (s || '').toUpperCase() : (s || '')).trim();
+
+    // Frame
+    ctx.fillStyle = data.borderColor || '#E10600';
+    ctx.fillRect(0, 0, W, H);
+
+    // White panel
+    const border = data.border || SPEC.border;
+    const ix0 = border, iy0 = border;
+    const ix1 = SPEC.width - border, iy1 = SPEC.height - border;
+    ctx.fillStyle = '#fff';
+    roundRect(ctx, ix0 * k, iy0 * k, (ix1 - ix0) * k, (iy1 - iy0) * k, SPEC.innerRadius * k);
+    ctx.fill();
+
+    const qrUrl = (data.qrUrl || '').trim();
+    const qr = buildQr(qrUrl);
+
+    // Back of a fold-over label: frame + plain white panel + QR code centered (if any)
+    if (data.qrOnly) {
+      if (qr) {
+        const size = (iy1 - iy0) - SPEC.qrInset * 2;
+        drawQr(ctx, qr, (SPEC.width - size) / 2 * k, (iy0 + SPEC.qrInset) * k, size * k);
+      }
+      return { qrTooLong: !!qrUrl && !qr };
+    }
+
+    // Background image: cover-fit (center crop) into the white panel, faded by bgOpacity
+    if (data.bg && data.bg.naturalWidth) {
+      const bgImg = applyEffect(data.bg, data.bgEffect, data.borderColor);
+      const pw = (ix1 - ix0) * k, ph = (iy1 - iy0) * k;
+      const scale = Math.max(pw / data.bg.naturalWidth, ph / data.bg.naturalHeight);
+      const sw = pw / scale, sh = ph / scale;
+      const sx = (data.bg.naturalWidth - sw) / 2, sy = (data.bg.naturalHeight - sh) / 2;
+      ctx.save();
+      ctx.clip();
+      ctx.globalAlpha = Math.max(0, Math.min(1, data.bgOpacity == null ? 0.35 : data.bgOpacity));
+      ctx.imageSmoothingQuality = 'high';
+      ctx.drawImage(bgImg, sx, sy, sw, sh, ix0 * k, iy0 * k, pw, ph);
+      ctx.restore();
+    }
+
+    // QR code (left side, full panel height so it stays scannable)
+    let textLeft = ix0 + SPEC.padX;
+    if (qr) {
+      const size = (iy1 - iy0) - SPEC.qrInset * 2;
+      drawQr(ctx, qr, (ix0 + SPEC.qrInset) * k, (iy0 + SPEC.qrInset) * k, size * k);
+      textLeft = ix0 + SPEC.qrInset + size + SPEC.qrGap;
+    }
+
+    // Right column: card # (top) and serial # (bottom), right-aligned
+    let right = ix1 - SPEC.padX;
+    const lines = [tx(data.yearSet), tx(data.player), tx(data.parallel)];
+    const cardNo = tx(data.cardNo);
+    const serial = tx(data.serial);
+
+    const measure = (text, weight, sizeIn) => {
+      if (!text) return 0;
+      ctx.font = font(weight, sizeIn, k);
+      return ctx.measureText(text).width / k;
+    };
+
+    // Find one font size that fits every row (keeps all lines visually consistent)
+    const fits = (size) => {
+      const cardW = measure(cardNo, weight, size);
+      const serialW = measure(serial, weight, size);
+      const limits = [
+        right - (cardW ? cardW + SPEC.rightGap : 0) - textLeft,
+        right - textLeft,
+        right - (serialW ? serialW + SPEC.rightGap : 0) - textLeft,
+      ];
+      return lines.every((l, i) => measure(l, weight, size) <= limits[i]);
+    };
+    // Logo rect. Center: straddles the bottom border and grows upward with logoScale.
+    // Left/right: its own column inside the panel; the text and numbers move over to make room.
+    let logoRect = null;
+    const logoPos = data.logoPos || 'center';
+    if (data.logo && data.logo.naturalWidth) {
+      const s = data.logoScale || 1;
+      const ratio = data.logo.naturalWidth / data.logo.naturalHeight;
+      const contain = (bw, bh) => {
+        let w = bw, lh = bw / ratio;
+        if (lh > bh) { lh = bh; w = lh * ratio; }
+        return { w, h: lh };
+      };
+      if (logoPos === 'center') {
+        const box = SPEC.logoBox;
+        const bh = box.height * s;
+        const { w, h: lh } = contain(box.width * s, bh);
+        // Keep the logo straddling the panel's bottom edge, whatever the border thickness
+        const boxBottom = Math.min(SPEC.height - 0.005, iy1 + (box.top + box.height - (SPEC.height - SPEC.border)));
+        logoRect = { x: (SPEC.width - w) / 2, y: boxBottom - bh / 2 - lh / 2, w, h: lh };
+      } else {
+        const maxH = (iy1 - iy0) - SPEC.qrInset * 2;
+        const { w, h: lh } = contain(SPEC.logoSide.width * s, Math.min(maxH, SPEC.logoSide.height * s));
+        const y = (iy0 + iy1) / 2 - lh / 2;
+        if (logoPos === 'left') {
+          const x = qr ? textLeft : ix0 + SPEC.qrInset; // sits right of the QR code when there is one
+          logoRect = { x, y, w, h: lh };
+          textLeft = x + w + SPEC.qrGap;
+        } else {
+          const x = ix1 - SPEC.qrInset - w;
+          logoRect = { x, y, w, h: lh };
+          right = x - SPEC.qrGap;
+        }
+      }
+    }
+    const areaBottom = logoRect && logoPos === 'center' ? Math.min(iy1, logoRect.y) : iy1;
+
+    // The 3-line block is ~3x the font size tall; shrink if it can't fit above the logo
+    const [b0, b1] = SPEC.baselines;
+    const blockFactor = 2 * (b1 - b0) / SPEC.fontSize + 0.716;
+    let size = SPEC.fontSize * (data.fontScale || 1);
+    size = Math.min(size, Math.max(SPEC.minFontSize, (areaBottom - iy0 - 0.04) / blockFactor));
+    while (size > SPEC.minFontSize && !fits(size)) size -= 0.0025;
+
+    // Line spacing scales with the font size. The block is centered vertically in the
+    // white panel, or in the space above the logo when one is shown.
+    const step = (b1 - b0) * (size / SPEC.fontSize);
+    const capHeight = size * 0.716; // Arimo/Arial cap height ratio
+    const mid = (iy0 + areaBottom) / 2 + capHeight / 2;
+    const baselines = [mid - step, mid, mid + step];
+
+    ctx.fillStyle = data.textColor || SPEC.textColor;
+    ctx.textBaseline = 'alphabetic';
+
+    ctx.textAlign = 'left';
+    ctx.font = font(weight, size, k);
+    lines.forEach((l, i) => {
+      if (l) ctx.fillText(l, textLeft * k, baselines[i] * k);
+    });
+
+    ctx.textAlign = 'right';
+    if (cardNo) {
+      ctx.font = font(weight, size, k);
+      ctx.fillText(cardNo, right * k, baselines[0] * k);
+    }
+    if (serial) {
+      ctx.font = font(weight, size, k);
+      ctx.fillText(serial, right * k, baselines[2] * k);
+    }
+
+    if (logoRect) {
+      ctx.imageSmoothingQuality = 'high';
+      const logoImg = applyEffect(data.logo, data.logoEffect, data.borderColor);
+      ctx.drawImage(logoImg, logoRect.x * k, logoRect.y * k, logoRect.w * k, logoRect.h * k);
+    }
+
+    return { qrTooLong: !!qrUrl && !qr };
+  }
+
+  global.SlabLabel = { SPEC, render };
+})(window);
+</script>
+  <script>
+(function () {
+  'use strict';
+
+  const DPI = 600;
+  const STORAGE_KEY = 'labelit:v1';
+  const DEFAULTS = {
+    yearSet: '2026 Topps Chrome',
+    player: 'Shohei Ohtani',
+    parallel: 'Gold Refractor',
+    cardNo: '#17',
+    serial: '25/50',
+    borderColor: '#E10600',
+    qrUrl: '',
+    allCaps: true,
+    fontWeight: 400,
+    textColor: '#111111',
+    logoEffect: 'none',
+    bgEffect: 'none',
+    fontScale: 75,
+    logoScale: 100,
+    logoPos: 'center',
+    bgOpacity: 35,
+    border: 80,
+  };
+  const PRESETS = [
+    ['Red', '#E10600'], ['Orange', '#F26B1D'], ['Gold', '#D4A017'], ['Green', '#1E8E3E'],
+    ['Teal', '#0F9D9A'], ['Blue', '#1A57D6'], ['Navy', '#14284B'], ['Purple', '#6B2FB3'],
+    ['Pink', '#E0458B'], ['Silver', '#A7ADB4'], ['Black', '#111111'],
+  ];
+
+  const form = document.getElementById('label-form');
+  const canvas = document.getElementById('label-canvas');
+  const qrInput = form.elements.qrUrl;
+
+  // ---------- state ----------
+  function readForm() {
+    const el = form.elements;
+    return {
+      yearSet: el.yearSet.value,
+      player: el.player.value,
+      parallel: el.parallel.value,
+      cardNo: el.cardNo.value,
+      serial: el.serial.value,
+      borderColor: borderColor.value(),
+      textColor: textColor.value(),
+      logoEffect: el.logoEffect.value,
+      bgEffect: el.bgEffect.value,
+      qrUrl: el.qrUrl.value,
+      allCaps: el.allCaps.checked,
+      fontWeight: Number(el.fontWeight.value) || 400,
+      fontScale: Number(el.fontScale.value) / 100,
+      logoScale: Number(el.logoScale.value) / 100,
+      logoPos: el.logoPos.value || 'center',
+      bgOpacity: Number(el.bgOpacity.value) / 100,
+      border: Number(el.border.value) / 1000,
+    };
+  }
+
+  function writeForm(s) {
+    const el = form.elements;
+    ['yearSet', 'player', 'parallel', 'cardNo', 'serial', 'qrUrl'].forEach((k) => { el[k].value = s[k] || ''; });
+    el.allCaps.checked = s.allCaps !== false;
+    el.fontWeight.value = String(s.fontWeight || 400);
+    el.fontScale.value = s.fontScale ? (s.fontScale <= 1 ? s.fontScale * 100 : s.fontScale) : 75;
+    el.logoScale.value = s.logoScale ? (s.logoScale <= 2 ? s.logoScale * 100 : s.logoScale) : 100;
+    el.logoPos.value = s.logoPos || 'center';
+    el.bgOpacity.value = s.bgOpacity != null ? (s.bgOpacity <= 1 ? s.bgOpacity * 100 : s.bgOpacity) : 35;
+    el.border.value = s.border ? (s.border < 1 ? Math.round(s.border * 1000) : s.border) : 80;
+    syncFontSizeOut();
+    el.logoEffect.value = s.logoEffect || 'none';
+    el.bgEffect.value = s.bgEffect || 'none';
+    borderColor.set(s.borderColor || DEFAULTS.borderColor);
+    textColor.set(s.textColor || DEFAULTS.textColor);
+  }
+
+  function save() {
+    const images = {
+      logoDataUrl: logo.dataUrl, logoFileName: logo.name,
+      bgDataUrl: bg.dataUrl, bgFileName: bg.name,
+    };
+    // Images can exceed the storage quota; fall back to saving fewer of them.
+    const attempts = [
+      images,
+      { logoDataUrl: images.logoDataUrl, logoFileName: images.logoFileName },
+      {},
+    ];
+    for (const extra of attempts) {
+      try { localStorage.setItem(STORAGE_KEY, JSON.stringify({ ...readForm(), double: doubleBox.checked, backMode: backMode(), ...extra })); return; } catch (e) { /* try smaller */ }
+    }
+  }
+
+  function load() {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      return raw ? JSON.parse(raw) : null;
+    } catch (e) { return null; }
+  }
+
+  function syncFontSizeOut() {
+    document.getElementById('font-size-out').textContent = form.elements.fontScale.value + '%';
+    document.getElementById('logo-size-out').textContent = form.elements.logoScale.value + '%';
+    document.getElementById('bg-opacity-out').textContent = form.elements.bgOpacity.value + '%';
+    document.getElementById('border-out').textContent = (form.elements.border.value / 1000).toFixed(3) + '″';
+  }
+  ['fontScale', 'logoScale', 'bgOpacity', 'border'].forEach((n) => form.elements[n].addEventListener('input', syncFontSizeOut));
+
+  // ---------- color ----------
+  function normalizeHex(v) {
+    let h = (v || '').trim().replace(/^#?/, '');
+    if (/^[0-9a-f]{3}$/i.test(h)) h = h.split('').map((c) => c + c).join('');
+    return /^[0-9a-f]{6}$/i.test(h) ? '#' + h.toUpperCase() : null;
+  }
+
+  // Picker + hex box + preset swatches, kept in sync
+  function colorControl(pickerId, hexId, swatchesId, presets, fallback) {
+    const picker = document.getElementById(pickerId);
+    const hexInput = document.getElementById(hexId);
+    const swatches = document.getElementById(swatchesId);
+    const mark = (n) => [...swatches.children].forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.hex === n)));
+    const set = (hex) => {
+      const n = normalizeHex(hex);
+      if (!n) return;
+      picker.value = n.toLowerCase();
+      hexInput.value = n;
+      hexInput.classList.remove('invalid');
+      mark(n);
+    };
+    presets.forEach(([name, hex]) => {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'swatch';
+      b.title = `${name} ${hex}`;
+      b.setAttribute('aria-label', name);
+      b.setAttribute('role', 'listitem');
+      b.dataset.hex = hex;
+      b.style.background = hex;
+      b.addEventListener('click', () => { set(hex); update(); });
+      swatches.appendChild(b);
+    });
+    picker.addEventListener('input', () => { set(picker.value); update(); });
+    hexInput.addEventListener('input', () => {
+      const n = normalizeHex(hexInput.value);
+      hexInput.classList.toggle('invalid', !n);
+      if (n) { picker.value = n.toLowerCase(); mark(n); update(); }
+    });
+    hexInput.addEventListener('blur', () => { set(hexInput.value); update(); });
+    return { set, value: () => normalizeHex(hexInput.value) || fallback, hexInput };
+  }
+
+  const TEXT_PRESETS = [
+    ['Black', '#111111'], ['White', '#FFFFFF'], ['Charcoal', '#3A3F47'], ['Navy', '#14284B'],
+    ['Red', '#B00000'], ['Gold', '#B8860B'], ['Green', '#1E6B34'], ['Purple', '#4B2382'],
+  ];
+  const borderColor = colorControl('color-picker', 'color-hex', 'swatches', PRESETS, DEFAULTS.borderColor);
+  const textColor = colorControl('text-color-picker', 'text-color-hex', 'text-swatches', TEXT_PRESETS, DEFAULTS.textColor);
+
+  // ---------- images ----------
+  function loadImage(src) {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      img.onload = () => resolve(img);
+      img.onerror = reject;
+      img.src = src;
+    });
+  }
+
+  // Logo: trim transparent / near-white margins, then cap the size so it stays light to store.
+  function prepareLogo(img) {
+    const c = document.createElement('canvas');
+    c.width = img.naturalWidth; c.height = img.naturalHeight;
+    const x = c.getContext('2d');
+    x.drawImage(img, 0, 0);
+    let minX = c.width, minY = c.height, maxX = -1, maxY = -1;
+    try {
+      const d = x.getImageData(0, 0, c.width, c.height).data;
+      for (let y = 0; y < c.height; y++) {
+        for (let px = 0; px < c.width; px++) {
+          const i = (y * c.width + px) * 4;
+          const blank = d[i + 3] < 16 || (d[i] > 245 && d[i + 1] > 245 && d[i + 2] > 245);
+          if (!blank) {
+            if (px < minX) minX = px;
+            if (px > maxX) maxX = px;
+            if (y < minY) minY = y;
+            if (y > maxY) maxY = y;
+          }
+        }
+      }
+    } catch (e) { /* unreadable pixels: keep the full image */ }
+    if (maxX < 0) { minX = 0; minY = 0; maxX = c.width - 1; maxY = c.height - 1; }
+    const sw = maxX - minX + 1, sh = maxY - minY + 1;
+    const scale = Math.min(1, 1200 / Math.max(sw, sh));
+    const out = document.createElement('canvas');
+    out.width = Math.max(1, Math.round(sw * scale));
+    out.height = Math.max(1, Math.round(sh * scale));
+    const o = out.getContext('2d');
+    o.imageSmoothingQuality = 'high';
+    o.drawImage(c, minX, minY, sw, sh, 0, 0, out.width, out.height);
+    return out.toDataURL('image/png');
+  }
+
+  // Background: center-crop to the white panel's shape at its largest (thinnest border), at 600 DPI.
+  function prepareBackground(img) {
+    const S = SlabLabel.SPEC;
+    const pw = Math.round((S.width - S.minBorder * 2) * DPI);
+    const ph = Math.round((S.height - S.minBorder * 2) * DPI);
+    const scale = Math.max(pw / img.naturalWidth, ph / img.naturalHeight);
+    const sw = pw / scale, sh = ph / scale;
+    const out = document.createElement('canvas');
+    out.width = pw; out.height = ph;
+    const o = out.getContext('2d');
+    o.fillStyle = '#fff';
+    o.fillRect(0, 0, pw, ph);
+    o.imageSmoothingQuality = 'high';
+    o.drawImage(img, (img.naturalWidth - sw) / 2, (img.naturalHeight - sh) / 2, sw, sh, 0, 0, pw, ph);
+    return out.toDataURL('image/jpeg', 0.92);
+  }
+
+  function imageSlot(prefix, prepare) {
+    const input = document.getElementById(`${prefix}-input`);
+    const clear = document.getElementById(`${prefix}-clear`);
+    const nameEl = document.getElementById(`${prefix}-name`);
+    const slot = { img: null, dataUrl: null, name: '' };
+
+    slot.set = async (dataUrl, name) => {
+      if (!dataUrl) {
+        Object.assign(slot, { img: null, dataUrl: null, name: '' });
+        nameEl.textContent = 'No image';
+        clear.hidden = true;
+        input.value = '';
+        update();
+        return;
+      }
+      try {
+        slot.img = await loadImage(dataUrl);
+        slot.dataUrl = dataUrl;
+        slot.name = name || 'image';
+        nameEl.textContent = slot.name;
+        clear.hidden = false;
+        update();
+      } catch (e) {
+        nameEl.textContent = 'Could not read that image';
+      }
+    };
+
+    input.addEventListener('change', () => {
+      const file = input.files && input.files[0];
+      if (!file) return;
+      nameEl.textContent = 'Processing…';
+      const reader = new FileReader();
+      reader.onload = async () => {
+        try {
+          const prepared = prepare(await loadImage(reader.result));
+          slot.set(prepared, file.name);
+        } catch (e) {
+          nameEl.textContent = 'Could not read that image';
+        }
+      };
+      reader.readAsDataURL(file);
+    });
+    clear.addEventListener('click', () => slot.set(null));
+    return slot;
+  }
+
+  const logo = imageSlot('logo', prepareLogo);
+  const bg = imageSlot('bg', prepareBackground);
+
+  // ---------- render ----------
+  // The label is drawn off-screen, then composed into the visible canvas: one copy, or a
+  // fold-over pair (top copy rotated 180°). Download and Print use the visible canvas.
+  const single = document.createElement('canvas');
+  const back = document.createElement('canvas');
+  const doubleBox = document.getElementById('double');
+  const backRadios = [...document.querySelectorAll('input[name="backMode"]')];
+  const backMode = () => (backRadios.find((r) => r.checked) || {}).value || 'same';
+  const qrBack = () => doubleBox.checked && backMode() === 'qr';
+
+  function compose() {
+    const dbl = doubleBox.checked;
+    const w = single.width, h = single.height;
+    canvas.width = w;
+    canvas.height = dbl ? h * 2 : h;
+    const ctx = canvas.getContext('2d');
+    if (dbl) {
+      ctx.save();
+      ctx.translate(w, h);
+      ctx.rotate(Math.PI);
+      ctx.drawImage(qrBack() ? back : single, 0, 0); // top copy becomes the back once folded
+      ctx.restore();
+      ctx.drawImage(single, 0, h);
+    } else {
+      ctx.drawImage(single, 0, 0);
+    }
+    canvas.classList.toggle('double', dbl);
+    document.getElementById('double-hint').hidden = !dbl;
+    document.getElementById('back-side').hidden = !dbl;
+    document.getElementById('dims').textContent = dbl
+      ? '2.5″ × 1.5″ (folds to 2.5″ × 0.75″) · 600 DPI'
+      : '2.5″ × 0.75″ · 600 DPI';
+    document.getElementById('label-printer-opt').textContent = dbl
+      ? 'Label printer (2.5″×1.5″)'
+      : 'Label printer (2.5″×0.75″)';
+  }
+
+  doubleBox.addEventListener('change', update);
+  backRadios.forEach((r) => r.addEventListener('change', update));
+
+  let raf = 0;
+  function update() {
+    cancelAnimationFrame(raf);
+    raf = requestAnimationFrame(() => {
+      const data = { ...readForm(), logo: logo.img, bg: bg.img };
+      // With a QR-only back, the QR code lives on the back and is left off the front
+      let result = SlabLabel.render(single, qrBack() ? { ...data, qrUrl: '' } : data, DPI);
+      if (qrBack()) result = SlabLabel.render(back, { ...data, qrOnly: true }, DPI);
+      compose();
+      qrInput.classList.toggle('invalid', result.qrTooLong);
+      qrInput.title = !result.qrTooLong ? ''
+        : typeof window.qrcode !== 'function' ? 'QR library could not load (are you offline?)'
+        : 'URL is too long to encode as a QR code';
+      save();
+    });
+  }
+
+  // Hex boxes update the preview themselves once the value is valid
+  form.addEventListener('input', (e) => { if (!e.target.classList.contains('hex-input')) update(); });
+  form.addEventListener('submit', (e) => e.preventDefault());
+
+  document.getElementById('reset').addEventListener('click', () => {
+    writeForm({ ...DEFAULTS, yearSet: '', player: '', parallel: '', cardNo: '', serial: '' });
+    logo.set(null);
+    bg.set(null);
+  });
+
+  // ---------- export ----------
+  function fileBase() {
+    const s = readForm();
+    const base = [s.yearSet, s.player, s.cardNo].filter(Boolean).join(' ').trim() || 'slab-label';
+    return base.replace(/[^a-z0-9]+/gi, '-').replace(/^-|-$/g, '').toLowerCase();
+  }
+
+  // Embed DPI in the PNG (pHYs chunk) so image apps print it at 2.5" x 0.75".
+  const CRC_TABLE = (() => {
+    const t = new Uint32Array(256);
+    for (let n = 0; n < 256; n++) {
+      let c = n;
+      for (let k = 0; k < 8; k++) c = c & 1 ? 0xedb88320 ^ (c >>> 1) : c >>> 1;
+      t[n] = c >>> 0;
+    }
+    return t;
+  })();
+  function crc32(bytes) {
+    let c = 0xffffffff;
+    for (let i = 0; i < bytes.length; i++) c = CRC_TABLE[(c ^ bytes[i]) & 0xff] ^ (c >>> 8);
+    return (c ^ 0xffffffff) >>> 0;
+  }
+  function withDpi(pngBytes, dpi) {
+    const ppm = Math.round(dpi / 0.0254);
+    const chunk = new Uint8Array(21);
+    const dv = new DataView(chunk.buffer);
+    dv.setUint32(0, 9);
+    chunk.set([0x70, 0x48, 0x59, 0x73], 4); // "pHYs"
+    dv.setUint32(8, ppm);
+    dv.setUint32(12, ppm);
+    chunk[16] = 1; // unit: meter
+    dv.setUint32(17, crc32(chunk.subarray(4, 17)));
+    const insertAt = 33; // signature (8) + IHDR chunk (25)
+    const out = new Uint8Array(pngBytes.length + chunk.length);
+    out.set(pngBytes.subarray(0, insertAt), 0);
+    out.set(chunk, insertAt);
+    out.set(pngBytes.subarray(insertAt), insertAt + chunk.length);
+    return out;
+  }
+
+  document.getElementById('download').addEventListener('click', () => {
+    canvas.toBlob(async (blob) => {
+      const bytes = withDpi(new Uint8Array(await blob.arrayBuffer()), DPI);
+      const url = URL.createObjectURL(new Blob([bytes], { type: 'image/png' }));
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${fileBase()}${doubleBox.checked ? '-double' : ''}.png`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+    }, 'image/png');
+  });
+
+  document.getElementById('print').addEventListener('click', () => {
+    const mode = document.getElementById('print-mode').value;
+    const copies = Math.max(1, Math.min(36, parseInt(document.getElementById('copies').value, 10) || 1));
+    const src = canvas.toDataURL('image/png');
+    const area = document.getElementById('print-area');
+    const dbl = doubleBox.checked;
+    area.className = (mode === 'label' ? 'print-label' : 'print-sheet') + (dbl ? ' double' : '');
+    area.innerHTML = '';
+    for (let i = 0; i < copies; i++) {
+      const cell = document.createElement('div');
+      cell.className = 'cell';
+      const img = document.createElement('img');
+      img.src = src;
+      img.alt = '';
+      cell.appendChild(img);
+      area.appendChild(cell);
+    }
+    document.getElementById('print-page-style').textContent = mode === 'label'
+      ? `@page { size: 2.5in ${dbl ? '1.5in' : '0.75in'}; margin: 0; }`
+      : '@page { size: letter portrait; margin: 0.5in; }';
+    const imgs = [...area.querySelectorAll('img')];
+    Promise.all(imgs.map((i) => (i.complete ? null : new Promise((r) => { i.onload = r; }))))
+      .then(() => window.print());
+  });
+
+  // ---------- init ----------
+  const saved = load();
+  writeForm(saved || DEFAULTS);
+  doubleBox.checked = !!(saved && saved.double);
+  backRadios.forEach((r) => { r.checked = r.value === ((saved && saved.backMode) || 'same'); });
+  if (saved && saved.logoDataUrl) logo.set(saved.logoDataUrl, saved.logoFileName);
+  if (saved && saved.bgDataUrl) bg.set(saved.bgDataUrl, saved.bgFileName);
+
+  update();
+  // Re-render once the label font has loaded so canvas text uses Arimo, not a fallback.
+  if (document.fonts) {
+    Promise.all([
+      document.fonts.load('400 40px "Arimo"'),
+      document.fonts.load('700 40px "Arimo"'),
+    ]).then(update, update);
+  }
+})();
+</script>
+</body>
+</html>
