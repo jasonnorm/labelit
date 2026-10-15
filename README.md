@@ -12,6 +12,7 @@ Custom 2.5″ × 0.75″ slab labels for Zion SlabMag cases, made in the browser
 - QR code from any URL
 - MLB team logo picklist (all 30 primary logos) or your own logo upload
 - Logo position (left, center or right), auto-trimming, size and image effects
+- Rookie (RC) or HOF badge on the bottom border, in gold, silver, black or the border color
 - Background image (auto-cropped) with opacity and image effects
 - Double-sided fold-over labels, with an optional QR-code-only back
 - 600 DPI PNG download, Letter-sheet printing with cut lines, or label-printer output

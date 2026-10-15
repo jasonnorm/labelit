@@ -91,6 +91,7 @@ legend small { text-transform: none; letter-spacing: 0; font-weight: 400; }
   column-gap: 12px;
   margin-bottom: 4px;
 }
+.row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; align-items: end; }
 .f-year { grid-area: year; }
 .f-player { grid-area: player; }
 .f-parallel { grid-area: parallel; }
@@ -380,7 +381,35 @@ input[type="range"] { width: 100%; accent-color: var(--focus); }
         </fieldset>
 
         <fieldset>
-          <legend>9. Background image <small>(optional)</small></legend>
+          <legend>9. Badge <small>(optional)</small></legend>
+          <div class="field">
+            <span>Badge</span>
+            <div class="segmented" role="radiogroup" aria-label="Badge">
+              <label><input type="radio" name="badge" value="none" checked /><span>None</span></label>
+              <label><input type="radio" name="badge" value="rookie" /><span>Rookie (RC)</span></label>
+              <label><input type="radio" name="badge" value="hof" /><span>HOF</span></label>
+            </div>
+          </div>
+          <div class="row-2">
+            <label class="field">
+              <span>Badge color</span>
+              <select name="badgeColor">
+                <option value="gold">Gold</option>
+                <option value="silver">Silver</option>
+                <option value="black">Black</option>
+                <option value="border">Match border</option>
+              </select>
+            </label>
+            <label class="field size-field">
+              <span>Badge size <output id="badge-size-out">100%</output></span>
+              <input name="badgeScale" type="range" min="70" max="150" step="10" value="100" />
+            </label>
+          </div>
+          <p class="hint">Sits centered on the bottom border. A centered logo moves beside it.</p>
+        </fieldset>
+
+        <fieldset>
+          <legend>10. Background image <small>(optional)</small></legend>
           <div class="logo-row">
             <label class="file-btn">
               <input id="bg-input" type="file" accept="image/*" />
@@ -486,6 +515,8 @@ window.MLB_LOGOS = {"ARI":{"name":"Arizona Diamondbacks","svg":"<svg xmlns=\"htt
     qrGap: 0.05,
     logoBox: { width: 0.62, height: 0.16, top: 0.585 }, // center: straddles bottom border
     logoSide: { width: 0.45, height: 0.32 },            // left/right: own column in the panel
+    badgeHeight: 0.17,     // Rookie/HOF badge, centered on the bottom border
+    logoBadgeGap: 0.05,
     textColor: '#111111',
   };
 
@@ -563,6 +594,84 @@ window.MLB_LOGOS = {"ARI":{"name":"Arizona Diamondbacks","svg":"<svg xmlns=\"htt
     x.putImageData(px, 0, 0);
     effectCache.set(img, { key, canvas: c });
     return c;
+  }
+
+  const BADGE_COLORS = {
+    gold: { fill: '#D4AF37', ink: '#1A1A1A' },
+    silver: { fill: '#C3C8CE', ink: '#1A1A1A' },
+    black: { fill: '#111111', ink: '#FFFFFF' },
+  };
+
+  function badgeColors(choice, borderHex) {
+    if (BADGE_COLORS[choice]) return BADGE_COLORS[choice];
+    const [r, g, b] = hexToRgb(borderHex);
+    const light = 0.299 * r + 0.587 * g + 0.114 * b > 150;
+    return { fill: borderHex, ink: light ? '#1A1A1A' : '#FFFFFF' };
+  }
+
+  // Our own simple badge artwork (not any official mark): an "RC" shield or an "HOF" pill.
+  function drawBadge(ctx, type, rect, colorChoice, borderHex, k) {
+    const { fill, ink } = badgeColors(colorChoice, borderHex);
+    const x = rect.x * k, y = rect.y * k, w = rect.w * k, h = rect.h * k;
+    const outline = 0.012 * k; // white edge so the badge stands out on the border
+    ctx.save();
+    ctx.beginPath();
+    if (type === 'rookie') {
+      const r = w * 0.12;
+      ctx.moveTo(x + r, y);
+      ctx.lineTo(x + w - r, y);
+      ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+      ctx.lineTo(x + w, y + h * 0.52);
+      ctx.quadraticCurveTo(x + w, y + h * 0.82, x + w / 2, y + h);
+      ctx.quadraticCurveTo(x, y + h * 0.82, x, y + h * 0.52);
+      ctx.lineTo(x, y + r);
+      ctx.quadraticCurveTo(x, y, x + r, y);
+    } else {
+      roundRect(ctx, x, y, w, h, h / 2);
+    }
+    ctx.closePath();
+    ctx.lineJoin = 'round';
+    ctx.lineWidth = outline * 2;
+    ctx.strokeStyle = '#FFFFFF';
+    ctx.stroke();
+    ctx.fillStyle = fill;
+    ctx.fill();
+
+    // Thin inner keyline in the ink color
+    ctx.save();
+    ctx.clip();
+    ctx.lineWidth = 0.005 * k;
+    ctx.strokeStyle = ink;
+    ctx.globalAlpha = 0.6;
+    const inset = 0.016 * k;
+    ctx.beginPath();
+    if (type === 'rookie') {
+      const ix = x + inset, iw = w - inset * 2, iy = y + inset, ih = h - inset * 2.2, r = iw * 0.1;
+      ctx.moveTo(ix + r, iy);
+      ctx.lineTo(ix + iw - r, iy);
+      ctx.quadraticCurveTo(ix + iw, iy, ix + iw, iy + r);
+      ctx.lineTo(ix + iw, iy + ih * 0.52);
+      ctx.quadraticCurveTo(ix + iw, iy + ih * 0.82, ix + iw / 2, iy + ih);
+      ctx.quadraticCurveTo(ix, iy + ih * 0.82, ix, iy + ih * 0.52);
+      ctx.lineTo(ix, iy + r);
+      ctx.quadraticCurveTo(ix, iy, ix + r, iy);
+    } else {
+      roundRect(ctx, x + inset, y + inset, w - inset * 2, h - inset * 2, (h - inset * 2) / 2);
+    }
+    ctx.closePath();
+    ctx.stroke();
+    ctx.restore();
+
+    ctx.fillStyle = ink;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'alphabetic';
+    const label = type === 'rookie' ? 'RC' : 'HOF';
+    const size = type === 'rookie' ? h * 0.4 : h * 0.56;
+    ctx.font = `700 ${size}px ${SPEC.fontFamily}`;
+    const cap = size * 0.716;
+    const textCy = type === 'rookie' ? y + h * 0.43 : y + h / 2;
+    ctx.fillText(label, x + w / 2, textCy + cap / 2);
+    ctx.restore();
   }
 
   function buildQr(text) {
@@ -718,7 +827,22 @@ window.MLB_LOGOS = {"ARI":{"name":"Arizona Diamondbacks","svg":"<svg xmlns=\"htt
         }
       }
     }
-    const areaBottom = logoRect && logoPos === 'center' ? Math.min(iy1, logoRect.y) : iy1;
+    // Rookie / HOF badge: centered on the bottom border. A centered logo moves beside it.
+    let badgeRect = null;
+    if (data.badge === 'rookie' || data.badge === 'hof') {
+      const bh = SPEC.badgeHeight * (data.badgeScale || 1);
+      const bw = data.badge === 'rookie' ? bh * 0.95 : bh * 2.2;
+      const cy = Math.min(iy1, SPEC.height - 0.006 - bh / 2);
+      badgeRect = { x: (SPEC.width - bw) / 2, y: cy - bh / 2, w: bw, h: bh };
+      if (logoRect && logoPos === 'center') {
+        const groupW = logoRect.w + SPEC.logoBadgeGap + bw;
+        logoRect.x = (SPEC.width - groupW) / 2;
+        badgeRect.x = logoRect.x + logoRect.w + SPEC.logoBadgeGap;
+      }
+    }
+
+    let areaBottom = logoRect && logoPos === 'center' ? Math.min(iy1, logoRect.y) : iy1;
+    if (badgeRect) areaBottom = Math.min(areaBottom, badgeRect.y);
 
     // The 3-line block is ~3x the font size tall; shrink if it can't fit above the logo
     const [b0, b1] = SPEC.baselines;
@@ -759,6 +883,8 @@ window.MLB_LOGOS = {"ARI":{"name":"Arizona Diamondbacks","svg":"<svg xmlns=\"htt
       ctx.drawImage(logoImg, logoRect.x * k, logoRect.y * k, logoRect.w * k, logoRect.h * k);
     }
 
+    if (badgeRect) drawBadge(ctx, data.badge, badgeRect, data.badgeColor, data.borderColor, k);
+
     return { qrTooLong: !!qrUrl && !qr };
   }
 
@@ -785,6 +911,9 @@ window.MLB_LOGOS = {"ARI":{"name":"Arizona Diamondbacks","svg":"<svg xmlns=\"htt
     logoEffect: 'none',
     bgEffect: 'none',
     mlbTeam: '',
+    badge: 'none',
+    badgeColor: 'gold',
+    badgeScale: 100,
     fontScale: 75,
     logoScale: 100,
     logoPos: 'center',
@@ -814,6 +943,9 @@ window.MLB_LOGOS = {"ARI":{"name":"Arizona Diamondbacks","svg":"<svg xmlns=\"htt
       textColor: textColor.value(),
       logoEffect: el.logoEffect.value,
       mlbTeam: el.mlbTeam.value,
+      badge: el.badge.value || 'none',
+      badgeColor: el.badgeColor.value,
+      badgeScale: Number(el.badgeScale.value) / 100,
       bgEffect: el.bgEffect.value,
       qrUrl: el.qrUrl.value,
       allCaps: el.allCaps.checked,
@@ -838,6 +970,10 @@ window.MLB_LOGOS = {"ARI":{"name":"Arizona Diamondbacks","svg":"<svg xmlns=\"htt
     el.border.value = s.border ? (s.border < 1 ? Math.round(s.border * 1000) : s.border) : 80;
     syncFontSizeOut();
     el.logoEffect.value = s.logoEffect || 'none';
+    el.badge.value = s.badge || 'none';
+    el.badgeColor.value = s.badgeColor || 'gold';
+    el.badgeScale.value = s.badgeScale ? (s.badgeScale <= 2 ? Math.round(s.badgeScale * 100) : s.badgeScale) : 100;
+    syncFontSizeOut();
     if (s.mlbTeam !== undefined) el.mlbTeam.value = s.mlbTeam || '';
     el.bgEffect.value = s.bgEffect || 'none';
     borderColor.set(s.borderColor || DEFAULTS.borderColor);
@@ -871,9 +1007,10 @@ window.MLB_LOGOS = {"ARI":{"name":"Arizona Diamondbacks","svg":"<svg xmlns=\"htt
     document.getElementById('font-size-out').textContent = form.elements.fontScale.value + '%';
     document.getElementById('logo-size-out').textContent = form.elements.logoScale.value + '%';
     document.getElementById('bg-opacity-out').textContent = form.elements.bgOpacity.value + '%';
+    document.getElementById('badge-size-out').textContent = form.elements.badgeScale.value + '%';
     document.getElementById('border-out').textContent = (form.elements.border.value / 1000).toFixed(3) + '″';
   }
-  ['fontScale', 'logoScale', 'bgOpacity', 'border'].forEach((n) => form.elements[n].addEventListener('input', syncFontSizeOut));
+  ['fontScale', 'logoScale', 'bgOpacity', 'border', 'badgeScale'].forEach((n) => form.elements[n].addEventListener('input', syncFontSizeOut));
 
   // ---------- color ----------
   function normalizeHex(v) {
