@@ -235,6 +235,9 @@ input[type="range"] { width: 100%; accent-color: var(--focus); }
 .section-body .field { margin-bottom: 12px; }
 .section-body .logo-row { margin-bottom: 12px; }
 .caps-check { align-self: end; padding-bottom: 8px; }
+.match-team { display: grid; gap: 8px; margin-bottom: 12px; justify-items: start; }
+.match-team .hint { margin: 0; }
+.match-team.disabled .segmented { opacity: 0.45; pointer-events: none; }
 .reset { margin-top: 8px; }
 
 .export-title { margin: 4px 0 0; font-size: 0.8125rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); }
@@ -374,6 +377,17 @@ input[type="range"] { width: 100%; accent-color: var(--focus); }
                 <input name="borderColor" id="color-hex" class="hex-input" type="text" value="#E10600" maxlength="7" spellcheck="false" aria-label="Border color hex value" />
               </div>
               <div class="swatches" id="swatches" role="list" aria-label="Preset colors"></div>
+            </div>
+            <div class="match-team">
+              <label class="check">
+                <input name="matchTeam" type="checkbox" />
+                <span>Match team logo color</span>
+              </label>
+              <div class="segmented" id="match-team-shade" role="radiogroup" aria-label="Team color">
+                <label><input type="radio" name="teamShade" value="primary" checked /><span>Primary</span></label>
+                <label><input type="radio" name="teamShade" value="secondary" /><span>Secondary</span></label>
+              </div>
+              <p class="hint" id="match-team-hint">Uses the team's colors for MLB logos, or the main colors of an uploaded logo. Picking a color above turns this off.</p>
             </div>
             <label class="field size-field">
               <span>Thickness <output id="border-out">0.080″</output></span>
@@ -1103,6 +1117,8 @@ window.MLB_LOGOS = {"ARI":{"name":"Arizona Diamondbacks","svg":"<svg xmlns=\"htt
     logoEffect: 'none',
     bgEffect: 'none',
     mlbTeam: '',
+    matchTeam: false,
+    teamShade: 'primary',
     brandPick: '',
     brandPos: 'under-text',
     brandScale: 100,
@@ -1139,6 +1155,8 @@ window.MLB_LOGOS = {"ARI":{"name":"Arizona Diamondbacks","svg":"<svg xmlns=\"htt
       textColor: textColor.value(),
       logoEffect: el.logoEffect.value,
       mlbTeam: el.mlbTeam.value,
+      matchTeam: el.matchTeam.checked,
+      teamShade: el.teamShade.value || 'primary',
       brandPick: el.brandPick.value,
       brandPos: el.brandPos.value || 'under-text',
       brandScale: Number(el.brandScale.value) / 100,
@@ -1179,6 +1197,8 @@ window.MLB_LOGOS = {"ARI":{"name":"Arizona Diamondbacks","svg":"<svg xmlns=\"htt
     el.badgeScale.value = s.badgeScale ? (s.badgeScale <= 2 ? Math.round(s.badgeScale * 100) : s.badgeScale) : 100;
     syncFontSizeOut();
     if (s.mlbTeam !== undefined) el.mlbTeam.value = s.mlbTeam || '';
+    el.matchTeam.checked = !!s.matchTeam;
+    el.teamShade.value = s.teamShade || 'primary';
     el.bgEffect.value = s.bgEffect || 'none';
     borderColor.set(s.borderColor || DEFAULTS.borderColor);
     textColor.set(s.textColor || DEFAULTS.textColor);
@@ -1228,7 +1248,7 @@ window.MLB_LOGOS = {"ARI":{"name":"Arizona Diamondbacks","svg":"<svg xmlns=\"htt
   }
 
   // Picker + hex box + preset swatches, kept in sync
-  function colorControl(pickerId, hexId, swatchesId, presets, fallback) {
+  function colorControl(pickerId, hexId, swatchesId, presets, fallback, onUserChange = () => {}) {
     const picker = document.getElementById(pickerId);
     const hexInput = document.getElementById(hexId);
     const swatches = document.getElementById(swatchesId);
@@ -1250,14 +1270,14 @@ window.MLB_LOGOS = {"ARI":{"name":"Arizona Diamondbacks","svg":"<svg xmlns=\"htt
       b.setAttribute('role', 'listitem');
       b.dataset.hex = hex;
       b.style.background = hex;
-      b.addEventListener('click', () => { set(hex); update(); });
+      b.addEventListener('click', () => { set(hex); onUserChange(); update(); });
       swatches.appendChild(b);
     });
-    picker.addEventListener('input', () => { set(picker.value); update(); });
+    picker.addEventListener('input', () => { set(picker.value); onUserChange(); update(); });
     hexInput.addEventListener('input', () => {
       const n = normalizeHex(hexInput.value);
       hexInput.classList.toggle('invalid', !n);
-      if (n) { picker.value = n.toLowerCase(); mark(n); update(); }
+      if (n) { picker.value = n.toLowerCase(); mark(n); onUserChange(); update(); }
     });
     hexInput.addEventListener('blur', () => { set(hexInput.value); update(); });
     return { set, value: () => normalizeHex(hexInput.value) || fallback, hexInput };
@@ -1267,7 +1287,9 @@ window.MLB_LOGOS = {"ARI":{"name":"Arizona Diamondbacks","svg":"<svg xmlns=\"htt
     ['Black', '#111111'], ['White', '#FFFFFF'], ['Charcoal', '#3A3F47'], ['Navy', '#14284B'],
     ['Red', '#B00000'], ['Gold', '#B8860B'], ['Green', '#1E6B34'], ['Purple', '#4B2382'],
   ];
-  const borderColor = colorControl('color-picker', 'color-hex', 'swatches', PRESETS, DEFAULTS.borderColor);
+  // Picking a border color by hand turns off "Match team logo color"
+  const borderColor = colorControl('color-picker', 'color-hex', 'swatches', PRESETS, DEFAULTS.borderColor,
+    () => { form.elements.matchTeam.checked = false; });
   const textColor = colorControl('text-color-picker', 'text-color-hex', 'text-swatches', TEXT_PRESETS, DEFAULTS.textColor);
 
   // ---------- images ----------
@@ -1433,6 +1455,63 @@ window.MLB_LOGOS = {"ARI":{"name":"Arizona Diamondbacks","svg":"<svg xmlns=\"htt
   document.getElementById('brand-input').addEventListener('change', () => { brandPick.value = ''; save(); });
   document.getElementById('brand-clear').addEventListener('click', () => { brandPick.value = ''; save(); });
 
+  // ---------- Team colors (for "Match team logo color") ----------
+  const TEAM_COLORS = {
+    ARI: ['#A71930', '#E3D4AD'], ATH: ['#003831', '#EFB21E'], ATL: ['#CE1141', '#13274F'],
+    BAL: ['#DF4601', '#000000'], BOS: ['#BD3039', '#0C2340'], CHC: ['#0E3386', '#CC3433'],
+    CWS: ['#27251F', '#C4CED4'], CIN: ['#C6011F', '#000000'], CLE: ['#00385D', '#E50022'],
+    COL: ['#333366', '#C4CED4'], DET: ['#0C2340', '#FA4616'], HOU: ['#002D62', '#EB6E1F'],
+    KC: ['#004687', '#BD9B60'], LAA: ['#BA0021', '#003263'], LAD: ['#005A9C', '#EF3E42'],
+    MIA: ['#00A3E0', '#EF3340'], MIL: ['#12284B', '#FFC52F'], MIN: ['#002B5C', '#D31145'],
+    NYM: ['#002D72', '#FF5910'], NYY: ['#0C2340', '#C4CED3'], PHI: ['#E81828', '#002D72'],
+    PIT: ['#27251F', '#FDB827'], SD: ['#2F241D', '#FFC425'], SF: ['#FD5A1E', '#27251F'],
+    SEA: ['#0C2C56', '#005C5C'], STL: ['#C41E3A', '#0C2340'], TB: ['#092C5C', '#8FBCE6'],
+    TEX: ['#003278', '#C0111F'], TOR: ['#134A8E', '#1D2D5C'], WSH: ['#AB0003', '#14225A'],
+  };
+
+  // Main colors of an uploaded logo: most common colors, ignoring transparent and near-white pixels.
+  const logoColorCache = new WeakMap();
+  function logoColors(img) {
+    if (logoColorCache.has(img)) return logoColorCache.get(img);
+    const c = document.createElement('canvas');
+    const scale = Math.min(1, 120 / Math.max(img.naturalWidth, img.naturalHeight));
+    c.width = Math.max(1, Math.round(img.naturalWidth * scale));
+    c.height = Math.max(1, Math.round(img.naturalHeight * scale));
+    const x = c.getContext('2d');
+    x.drawImage(img, 0, 0, c.width, c.height);
+    const counts = new Map();
+    try {
+      const d = x.getImageData(0, 0, c.width, c.height).data;
+      for (let i = 0; i < d.length; i += 4) {
+        if (d[i + 3] < 160) continue;
+        if (d[i] > 232 && d[i + 1] > 232 && d[i + 2] > 232) continue;
+        const key = ((d[i] >> 4) << 8) | ((d[i + 1] >> 4) << 4) | (d[i + 2] >> 4);
+        const e = counts.get(key) || { n: 0, r: 0, g: 0, b: 0 };
+        e.n++; e.r += d[i]; e.g += d[i + 1]; e.b += d[i + 2];
+        counts.set(key, e);
+      }
+    } catch (e) { /* unreadable pixels */ }
+    const hex = (e) => '#' + [e.r, e.g, e.b].map((v) => Math.round(v / e.n).toString(16).padStart(2, '0')).join('').toUpperCase();
+    const ranked = [...counts.values()].sort((a, b) => b.n - a.n);
+    const dist = (a, b) => Math.abs(a.r / a.n - b.r / b.n) + Math.abs(a.g / a.n - b.g / b.n) + Math.abs(a.b / a.n - b.b / b.n);
+    const primary = ranked[0];
+    const secondary = primary && ranked.find((e) => dist(e, primary) > 120);
+    const result = primary ? [hex(primary), secondary ? hex(secondary) : hex(primary)] : null;
+    logoColorCache.set(img, result);
+    return result;
+  }
+
+  // When "Match team logo color" is on, keep the border in sync with the current team logo
+  function applyTeamColor() {
+    const el = form.elements;
+    const box = document.querySelector('.match-team');
+    box.classList.toggle('disabled', !el.matchTeam.checked);
+    if (!el.matchTeam.checked || !logo.img) return;
+    const colors = TEAM_COLORS[el.mlbTeam.value] || logoColors(logo.img);
+    if (!colors) return;
+    borderColor.set(colors[el.teamShade.value === 'secondary' ? 1 : 0]);
+  }
+
   // ---------- MLB team logos ----------
   const mlbSelect = document.getElementById('mlb-team');
   const MLB = window.MLB_LOGOS || {};
@@ -1526,6 +1605,7 @@ window.MLB_LOGOS = {"ARI":{"name":"Arizona Diamondbacks","svg":"<svg xmlns=\"htt
   function update() {
     cancelAnimationFrame(raf);
     raf = requestAnimationFrame(() => {
+      applyTeamColor();
       const data = { ...readForm(), logo: logo.img, brand: brand.img, bg: bg.img };
       // With a QR-only back, the QR code lives on the back and is left off the front
       let result = SlabLabel.render(single, qrBack() ? { ...data, qrUrl: '' } : data, DPI);
@@ -1558,7 +1638,7 @@ window.MLB_LOGOS = {"ARI":{"name":"Arizona Diamondbacks","svg":"<svg xmlns=\"htt
     const card = [d.player, d.cardNo, d.serial].map((s) => (s || '').trim()).filter(Boolean).join(' · ');
     setSummary('card', card || 'Empty', !!card);
     setSummary('text', `${Math.round(d.fontScale * 100)}% · ${d.fontWeight === 700 ? 'Bold' : 'Normal'}${d.allCaps ? ' · CAPS' : ''}`, false, d.textColor);
-    setSummary('border', `${d.borderColor} · ${d.border.toFixed(3)}″`, false, d.borderColor);
+    setSummary('border', `${d.borderColor}${d.matchTeam && logo.img ? ' · team' : ''} · ${d.border.toFixed(3)}″`, false, d.borderColor);
     setSummary('bg', bg.img ? `${bg.name} · ${Math.round(d.bgOpacity * 100)}%` : 'Off', !!bg.img);
     setSummary('team', logo.img ? `${stripLogo(logo.name)} · ${POS_LABEL[d.logoPos]}` : 'Off', !!logo.img);
     setSummary('set', brand.img ? `${stripLogo(brand.name)} · ${POS_LABEL[d.brandPos]}` : 'Off', !!brand.img);
