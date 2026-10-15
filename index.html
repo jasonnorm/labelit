@@ -638,6 +638,7 @@ window.MLB_LOGOS = {"ARI":{"name":"Arizona Diamondbacks","svg":"<svg xmlns=\"htt
     qrGap: 0.05,
     logoBox: { width: 0.62, height: 0.16, top: 0.585 }, // center: straddles bottom border
     logoSide: { width: 0.45, height: 0.32 },            // left/right: own column in the panel
+    edgePad: 0.03,         // min gap between border-straddling items and the label's outer edge
     badgeHeight: 0.17,     // Rookie/HOF badge, centered on the bottom border
     logoBadgeGap: 0.05,
     brandBox: { width: 0.7, height: 0.15 }, // set logo under the text / serial #
@@ -919,7 +920,7 @@ window.MLB_LOGOS = {"ARI":{"name":"Arizona Diamondbacks","svg":"<svg xmlns=\"htt
     };
     // Top position mirrors the bottom one: straddles the top border, grows downward.
     const straddle = SPEC.logoBox.top + SPEC.logoBox.height - (SPEC.height - SPEC.border);
-    const topBoxTop = Math.max(0.005, iy0 - straddle);
+    const topBoxTop = Math.max(SPEC.edgePad, iy0 - straddle);
 
     // Logo rect. Center: straddles the bottom border and grows upward with logoScale.
     // Left/right: its own column inside the panel; the text and numbers move over to make room.
@@ -943,7 +944,7 @@ window.MLB_LOGOS = {"ARI":{"name":"Arizona Diamondbacks","svg":"<svg xmlns=\"htt
         const bh = box.height * s;
         const { w, h: lh } = contain(box.width * s, bh);
         // Keep the logo straddling the panel's bottom edge, whatever the border thickness
-        const boxBottom = Math.min(SPEC.height - 0.005, iy1 + (box.top + box.height - (SPEC.height - SPEC.border)));
+        const boxBottom = Math.min(SPEC.height - SPEC.edgePad, iy1 + (box.top + box.height - (SPEC.height - SPEC.border)));
         logoRect = { x: (SPEC.width - w) / 2, y: boxBottom - bh / 2 - lh / 2, w, h: lh };
       } else {
         const maxH = (iy1 - iy0) - SPEC.qrInset * 2;
@@ -965,7 +966,7 @@ window.MLB_LOGOS = {"ARI":{"name":"Arizona Diamondbacks","svg":"<svg xmlns=\"htt
     if (data.badge === 'rookie' || data.badge === 'hof') {
       const bh = SPEC.badgeHeight * (data.badgeScale || 1);
       const bw = data.badge === 'rookie' ? bh * 0.95 : bh * 2.2;
-      const cy = Math.min(iy1, SPEC.height - 0.006 - bh / 2);
+      const cy = Math.min(iy1, SPEC.height - SPEC.edgePad - bh / 2);
       badgeRect = { x: (SPEC.width - bw) / 2, y: cy - bh / 2, w: bw, h: bh };
       if (logoRect && logoPos === 'center') {
         const groupW = logoRect.w + SPEC.logoBadgeGap + bw;
@@ -1008,7 +1009,7 @@ window.MLB_LOGOS = {"ARI":{"name":"Arizona Diamondbacks","svg":"<svg xmlns=\"htt
           x0 = Math.max(...center.map((r) => r.x + r.w)) + gap;
         }
         const { w, h: bh } = contain(Math.min(box.width * s, x1 - x0), boxH);
-        const boxBottom = Math.min(SPEC.height - 0.005, iy1 + (SPEC.logoBox.top + SPEC.logoBox.height - (SPEC.height - SPEC.border)));
+        const boxBottom = Math.min(SPEC.height - SPEC.edgePad, iy1 + (SPEC.logoBox.top + SPEC.logoBox.height - (SPEC.height - SPEC.border)));
         const y = boxBottom - boxH / 2 - bh / 2;
         brandRect = { x: brandPos === 'under-text' ? x0 : x1 - w, y, w, h: bh };
       }
