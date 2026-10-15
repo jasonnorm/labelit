@@ -10,7 +10,8 @@ Custom 2.5″ × 0.75″ slab labels for Zion SlabMag cases, made in the browser
 - Text size, Normal/Bold weight, text color, ALL CAPS
 - Border color (picker, hex, presets) and thickness
 - QR code from any URL
-- Logo upload (left, center or right; auto-trimmed; resizable) with image effects
+- MLB team logo picklist (all 30 primary logos) or your own logo upload
+- Logo position (left, center or right), auto-trimming, size and image effects
 - Background image (auto-cropped) with opacity and image effects
 - Double-sided fold-over labels, with an optional QR-code-only back
 - 600 DPI PNG download, Letter-sheet printing with cut lines, or label-printer output
@@ -24,3 +25,7 @@ python3 -m http.server 5173
 ```
 
 When printing, choose **100% / Actual size** so labels come out at exactly 2.5″ × 0.75″.
+
+## Trademarks
+
+MLB team logos are trademarks of their respective clubs and Major League Baseball. They are included for personal, non-commercial labeling of your own cards. This project is not affiliated with or endorsed by MLB.
