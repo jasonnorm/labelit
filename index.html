@@ -355,7 +355,8 @@ input[type="range"] { width: 100%; accent-color: var(--focus); }
             <span>Position</span>
             <div class="segmented" role="radiogroup" aria-label="Logo position">
               <label><input type="radio" name="logoPos" value="left" /><span>Left</span></label>
-              <label><input type="radio" name="logoPos" value="center" checked /><span>Center</span></label>
+              <label><input type="radio" name="logoPos" value="top" /><span>Top</span></label>
+              <label><input type="radio" name="logoPos" value="center" checked /><span>Bottom</span></label>
               <label><input type="radio" name="logoPos" value="right" /><span>Right</span></label>
             </div>
           </div>
@@ -377,11 +378,57 @@ input[type="range"] { width: 100%; accent-color: var(--focus); }
               <option value="invert">Invert</option>
             </select>
           </label>
-          <p class="hint">Blank margins around the image are trimmed automatically. Center sits on the bottom border; left and right get their own column.</p>
+          <p class="hint">Blank margins around the image are trimmed automatically. Top and bottom sit centered on the border; left and right get their own column.</p>
         </fieldset>
 
         <fieldset>
-          <legend>9. Badge <small>(optional)</small></legend>
+          <legend>9. Set logo <small>(optional)</small></legend>
+          <label class="field">
+            <span>Manufacturer set logo</span>
+            <select name="brandPick" id="brand-pick">
+              <option value="">None — or upload your own below</option>
+            </select>
+          </label>
+          <div class="logo-row">
+            <label class="file-btn">
+              <input id="brand-input" type="file" accept="image/*" />
+              <span>Upload set logo</span>
+            </label>
+            <button type="button" class="btn-ghost" id="brand-clear" hidden>Remove</button>
+            <span class="logo-name" id="brand-name">No image</span>
+          </div>
+          <div class="field logo-pos">
+            <span>Position</span>
+            <div class="segmented" role="radiogroup" aria-label="Set logo position">
+              <label><input type="radio" name="brandPos" value="left" /><span>Left</span></label>
+              <label><input type="radio" name="brandPos" value="top" /><span>Top</span></label>
+              <label><input type="radio" name="brandPos" value="under-text" checked /><span>Under text</span></label>
+              <label><input type="radio" name="brandPos" value="under-serial" /><span>Under serial #</span></label>
+            </div>
+          </div>
+          <label class="field size-field logo-size">
+            <span>Set logo size <output id="brand-size-out">100%</output></span>
+            <input name="brandScale" type="range" min="50" max="200" step="10" value="100" />
+          </label>
+          <label class="field logo-size">
+            <span>Effect</span>
+            <select name="brandEffect" class="effect">
+              <option value="none">None</option>
+              <option value="bw">Black &amp; white</option>
+              <option value="sepia">Sepia</option>
+              <option value="vintage">Vintage</option>
+              <option value="contrast">High-contrast B&amp;W</option>
+              <option value="warm">Warm</option>
+              <option value="cool">Cool</option>
+              <option value="tint">Tint (border color)</option>
+              <option value="invert">Invert</option>
+            </select>
+          </label>
+          <p class="hint">Top sits centered on the top border; under text and under serial # sit on the bottom border; left gets its own column.</p>
+        </fieldset>
+
+        <fieldset>
+          <legend>10. Badge <small>(optional)</small></legend>
           <div class="field">
             <span>Badge</span>
             <div class="segmented" role="radiogroup" aria-label="Badge">
@@ -409,7 +456,7 @@ input[type="range"] { width: 100%; accent-color: var(--focus); }
         </fieldset>
 
         <fieldset>
-          <legend>10. Background image <small>(optional)</small></legend>
+          <legend>11. Background image <small>(optional)</small></legend>
           <div class="logo-row">
             <label class="file-btn">
               <input id="bg-input" type="file" accept="image/*" />
@@ -464,6 +511,10 @@ input[type="range"] { width: 100%; accent-color: var(--focus); }
             <label><input type="radio" name="backMode" value="qr" /><span>QR code only</span></label>
           </div>
         </div>
+        <label class="check" id="fold-line-row" hidden>
+          <input id="fold-line" type="checkbox" checked />
+          <span>Show fold line</span>
+        </label>
         <p class="hint" id="double-hint" hidden>Prints the label twice, joined along the fold line, with the top copy rotated 180°. Cut around the outside, fold back along the middle, and both sides read upright when you turn the slab over.</p>
         <button type="button" class="btn-primary" id="download">Download PNG</button>
         <div class="print-group">
@@ -517,6 +568,7 @@ window.MLB_LOGOS = {"ARI":{"name":"Arizona Diamondbacks","svg":"<svg xmlns=\"htt
     logoSide: { width: 0.45, height: 0.32 },            // left/right: own column in the panel
     badgeHeight: 0.17,     // Rookie/HOF badge, centered on the bottom border
     logoBadgeGap: 0.05,
+    brandBox: { width: 0.7, height: 0.15 }, // set logo under the text / serial #
     textColor: '#111111',
   };
 
@@ -793,6 +845,10 @@ window.MLB_LOGOS = {"ARI":{"name":"Arizona Diamondbacks","svg":"<svg xmlns=\"htt
       ];
       return lines.every((l, i) => measure(l, weight, size) <= limits[i]);
     };
+    // Top position mirrors the bottom one: straddles the top border, grows downward.
+    const straddle = SPEC.logoBox.top + SPEC.logoBox.height - (SPEC.height - SPEC.border);
+    const topBoxTop = Math.max(0.005, iy0 - straddle);
+
     // Logo rect. Center: straddles the bottom border and grows upward with logoScale.
     // Left/right: its own column inside the panel; the text and numbers move over to make room.
     let logoRect = null;
@@ -805,7 +861,12 @@ window.MLB_LOGOS = {"ARI":{"name":"Arizona Diamondbacks","svg":"<svg xmlns=\"htt
         if (lh > bh) { lh = bh; w = lh * ratio; }
         return { w, h: lh };
       };
-      if (logoPos === 'center') {
+      if (logoPos === 'top') {
+        const box = SPEC.logoBox;
+        const bh = box.height * s;
+        const { w, h: lh } = contain(box.width * s, bh);
+        logoRect = { x: (SPEC.width - w) / 2, y: topBoxTop + bh / 2 - lh / 2, w, h: lh };
+      } else if (logoPos === 'center') {
         const box = SPEC.logoBox;
         const bh = box.height * s;
         const { w, h: lh } = contain(box.width * s, bh);
@@ -841,21 +902,73 @@ window.MLB_LOGOS = {"ARI":{"name":"Arizona Diamondbacks","svg":"<svg xmlns=\"htt
       }
     }
 
+    // Manufacturer set logo. Left: its own column (after a left QR code / team logo).
+    // Under text / under serial #: on the bottom border, kept clear of centered items.
+    let brandRect = null;
+    const brandPos = data.brandPos || 'under-text';
+    if (data.brand && data.brand.naturalWidth) {
+      const s = data.brandScale || 1;
+      const ratio = data.brand.naturalWidth / data.brand.naturalHeight;
+      const contain = (bw, bh) => {
+        let w = Math.max(0.01, bw), bh2 = w / ratio;
+        if (bh2 > bh) { bh2 = bh; w = bh2 * ratio; }
+        return { w, h: bh2 };
+      };
+      if (brandPos === 'top') {
+        const boxH = SPEC.brandBox.height * s;
+        const { w, h: bh } = contain(SPEC.brandBox.width * s, boxH);
+        brandRect = { x: (SPEC.width - w) / 2, y: topBoxTop + boxH / 2 - bh / 2, w, h: bh };
+      } else if (brandPos === 'left') {
+        const maxH = (iy1 - iy0) - SPEC.qrInset * 2;
+        const { w, h: bh } = contain(SPEC.logoSide.width * s, Math.min(maxH, SPEC.logoSide.height * s));
+        const x = textLeft > ix0 + SPEC.padX + 0.001 ? textLeft : ix0 + SPEC.qrInset;
+        brandRect = { x, y: (iy0 + iy1) / 2 - bh / 2, w, h: bh };
+        textLeft = x + w + SPEC.qrGap;
+      } else {
+        const box = SPEC.brandBox;
+        const boxH = box.height * s;
+        const center = [logoPos === 'center' ? logoRect : null, badgeRect].filter(Boolean);
+        const gap = SPEC.logoBadgeGap;
+        let x0 = textLeft, x1 = right;
+        if (brandPos === 'under-text') {
+          if (center.length) x1 = Math.min(...center.map((r) => r.x)) - gap;
+        } else if (center.length) {
+          x0 = Math.max(...center.map((r) => r.x + r.w)) + gap;
+        }
+        const { w, h: bh } = contain(Math.min(box.width * s, x1 - x0), boxH);
+        const boxBottom = Math.min(SPEC.height - 0.005, iy1 + (SPEC.logoBox.top + SPEC.logoBox.height - (SPEC.height - SPEC.border)));
+        const y = boxBottom - boxH / 2 - bh / 2;
+        brandRect = { x: brandPos === 'under-text' ? x0 : x1 - w, y, w, h: bh };
+      }
+    }
+
+    // Both logos on top: place them side by side as a centered pair
+    if (logoRect && brandRect && logoPos === 'top' && brandPos === 'top') {
+      const gap = SPEC.logoBadgeGap;
+      const groupW = logoRect.w + gap + brandRect.w;
+      logoRect.x = (SPEC.width - groupW) / 2;
+      brandRect.x = logoRect.x + logoRect.w + gap;
+    }
+    let areaTop = iy0;
+    if (logoRect && logoPos === 'top') areaTop = Math.max(areaTop, logoRect.y + logoRect.h);
+    if (brandRect && brandPos === 'top') areaTop = Math.max(areaTop, brandRect.y + brandRect.h);
+
     let areaBottom = logoRect && logoPos === 'center' ? Math.min(iy1, logoRect.y) : iy1;
     if (badgeRect) areaBottom = Math.min(areaBottom, badgeRect.y);
+    if (brandRect && (brandPos === 'under-text' || brandPos === 'under-serial')) areaBottom = Math.min(areaBottom, brandRect.y);
 
     // The 3-line block is ~3x the font size tall; shrink if it can't fit above the logo
     const [b0, b1] = SPEC.baselines;
     const blockFactor = 2 * (b1 - b0) / SPEC.fontSize + 0.716;
     let size = SPEC.fontSize * (data.fontScale || 1);
-    size = Math.min(size, Math.max(SPEC.minFontSize, (areaBottom - iy0 - 0.04) / blockFactor));
+    size = Math.min(size, Math.max(SPEC.minFontSize, (areaBottom - areaTop - 0.04) / blockFactor));
     while (size > SPEC.minFontSize && !fits(size)) size -= 0.0025;
 
     // Line spacing scales with the font size. The block is centered vertically in the
     // white panel, or in the space above the logo when one is shown.
     const step = (b1 - b0) * (size / SPEC.fontSize);
     const capHeight = size * 0.716; // Arimo/Arial cap height ratio
-    const mid = (iy0 + areaBottom) / 2 + capHeight / 2;
+    const mid = (areaTop + areaBottom) / 2 + capHeight / 2;
     const baselines = [mid - step, mid, mid + step];
 
     ctx.fillStyle = data.textColor || SPEC.textColor;
@@ -881,6 +994,12 @@ window.MLB_LOGOS = {"ARI":{"name":"Arizona Diamondbacks","svg":"<svg xmlns=\"htt
       ctx.imageSmoothingQuality = 'high';
       const logoImg = applyEffect(data.logo, data.logoEffect, data.borderColor);
       ctx.drawImage(logoImg, logoRect.x * k, logoRect.y * k, logoRect.w * k, logoRect.h * k);
+    }
+
+    if (brandRect) {
+      ctx.imageSmoothingQuality = 'high';
+      const brandImg = applyEffect(data.brand, data.brandEffect, data.borderColor);
+      ctx.drawImage(brandImg, brandRect.x * k, brandRect.y * k, brandRect.w * k, brandRect.h * k);
     }
 
     if (badgeRect) drawBadge(ctx, data.badge, badgeRect, data.badgeColor, data.borderColor, k);
@@ -911,6 +1030,10 @@ window.MLB_LOGOS = {"ARI":{"name":"Arizona Diamondbacks","svg":"<svg xmlns=\"htt
     logoEffect: 'none',
     bgEffect: 'none',
     mlbTeam: '',
+    brandPick: '',
+    brandPos: 'under-text',
+    brandScale: 100,
+    brandEffect: 'none',
     badge: 'none',
     badgeColor: 'gold',
     badgeScale: 100,
@@ -943,6 +1066,10 @@ window.MLB_LOGOS = {"ARI":{"name":"Arizona Diamondbacks","svg":"<svg xmlns=\"htt
       textColor: textColor.value(),
       logoEffect: el.logoEffect.value,
       mlbTeam: el.mlbTeam.value,
+      brandPick: el.brandPick.value,
+      brandPos: el.brandPos.value || 'under-text',
+      brandScale: Number(el.brandScale.value) / 100,
+      brandEffect: el.brandEffect.value,
       badge: el.badge.value || 'none',
       badgeColor: el.badgeColor.value,
       badgeScale: Number(el.badgeScale.value) / 100,
@@ -970,6 +1097,10 @@ window.MLB_LOGOS = {"ARI":{"name":"Arizona Diamondbacks","svg":"<svg xmlns=\"htt
     el.border.value = s.border ? (s.border < 1 ? Math.round(s.border * 1000) : s.border) : 80;
     syncFontSizeOut();
     el.logoEffect.value = s.logoEffect || 'none';
+    el.brandPos.value = s.brandPos || 'under-text';
+    el.brandScale.value = s.brandScale ? (s.brandScale <= 2 ? Math.round(s.brandScale * 100) : s.brandScale) : 100;
+    el.brandEffect.value = s.brandEffect || 'none';
+    if (s.brandPick !== undefined) el.brandPick.value = s.brandPick || '';
     el.badge.value = s.badge || 'none';
     el.badgeColor.value = s.badgeColor || 'gold';
     el.badgeScale.value = s.badgeScale ? (s.badgeScale <= 2 ? Math.round(s.badgeScale * 100) : s.badgeScale) : 100;
@@ -983,16 +1114,19 @@ window.MLB_LOGOS = {"ARI":{"name":"Arizona Diamondbacks","svg":"<svg xmlns=\"htt
   function save() {
     const images = {
       logoDataUrl: logo.dataUrl, logoFileName: logo.name,
+      brandDataUrl: brand.dataUrl, brandFileName: brand.name,
       bgDataUrl: bg.dataUrl, bgFileName: bg.name,
     };
     // Images can exceed the storage quota; fall back to saving fewer of them.
     const attempts = [
       images,
+      { logoDataUrl: images.logoDataUrl, logoFileName: images.logoFileName,
+        brandDataUrl: images.brandDataUrl, brandFileName: images.brandFileName },
       { logoDataUrl: images.logoDataUrl, logoFileName: images.logoFileName },
       {},
     ];
     for (const extra of attempts) {
-      try { localStorage.setItem(STORAGE_KEY, JSON.stringify({ ...readForm(), double: doubleBox.checked, backMode: backMode(), ...extra })); return; } catch (e) { /* try smaller */ }
+      try { localStorage.setItem(STORAGE_KEY, JSON.stringify({ ...readForm(), double: doubleBox.checked, backMode: backMode(), foldLine: foldBox.checked, ...extra })); return; } catch (e) { /* try smaller */ }
     }
   }
 
@@ -1008,9 +1142,10 @@ window.MLB_LOGOS = {"ARI":{"name":"Arizona Diamondbacks","svg":"<svg xmlns=\"htt
     document.getElementById('logo-size-out').textContent = form.elements.logoScale.value + '%';
     document.getElementById('bg-opacity-out').textContent = form.elements.bgOpacity.value + '%';
     document.getElementById('badge-size-out').textContent = form.elements.badgeScale.value + '%';
+    document.getElementById('brand-size-out').textContent = form.elements.brandScale.value + '%';
     document.getElementById('border-out').textContent = (form.elements.border.value / 1000).toFixed(3) + '″';
   }
-  ['fontScale', 'logoScale', 'bgOpacity', 'border', 'badgeScale'].forEach((n) => form.elements[n].addEventListener('input', syncFontSizeOut));
+  ['fontScale', 'logoScale', 'bgOpacity', 'border', 'badgeScale', 'brandScale'].forEach((n) => form.elements[n].addEventListener('input', syncFontSizeOut));
 
   // ---------- color ----------
   function normalizeHex(v) {
@@ -1171,6 +1306,59 @@ window.MLB_LOGOS = {"ARI":{"name":"Arizona Diamondbacks","svg":"<svg xmlns=\"htt
 
   const logo = imageSlot('logo', prepareLogo);
   const bg = imageSlot('bg', prepareBackground);
+  const brand = imageSlot('brand', prepareLogo);
+
+  // ---------- Manufacturer set logos (files in logos/sets/) ----------
+  const SET_LOGOS = [
+    { id: "topps", maker: "Topps", name: "Topps (flagship)", file: "topps.png" },
+    { id: "topps-chrome", maker: "Topps", name: "Topps Chrome", file: "topps-chrome.png" },
+    { id: "topps-update", maker: "Topps", name: "Topps Update", file: "topps-update.png" },
+    { id: "topps-heritage", maker: "Topps", name: "Topps Heritage", file: "topps-heritage.png" },
+    { id: "topps-stadium-club", maker: "Topps", name: "Stadium Club", file: "topps-stadium-club.png" },
+    { id: "topps-finest", maker: "Topps", name: "Topps Finest", file: "topps-finest.png" },
+    { id: "allen-ginter", maker: "Topps", name: "Allen & Ginter", file: "allen-ginter.png" },
+    { id: "gypsy-queen", maker: "Topps", name: "Gypsy Queen", file: "gypsy-queen.png" },
+    { id: "topps-archives", maker: "Topps", name: "Topps Archives", file: "topps-archives.png" },
+    { id: "topps-tribute", maker: "Topps", name: "Topps Tribute", file: "topps-tribute.png" },
+    { id: "topps-inception", maker: "Topps", name: "Topps Inception", file: "topps-inception.png" },
+    { id: "topps-dynasty", maker: "Topps", name: "Topps Dynasty", file: "topps-dynasty.png" },
+    { id: "topps-sterling", maker: "Topps", name: "Topps Sterling", file: "topps-sterling.png" },
+    { id: "topps-gold-label", maker: "Topps", name: "Topps Gold Label", file: "topps-gold-label.png" },
+    { id: "topps-now", maker: "Topps", name: "Topps Now", file: "topps-now.png" },
+    { id: "bowman", maker: "Bowman", name: "Bowman", file: "bowman.png" },
+    { id: "bowman-chrome", maker: "Bowman", name: "Bowman Chrome", file: "bowman-chrome.png" },
+    { id: "bowman-draft", maker: "Bowman", name: "Bowman Draft", file: "bowman-draft.png" },
+    { id: "bowmans-best", maker: "Bowman", name: "Bowman's Best", file: "bowmans-best.png" },
+    { id: "bowman-sterling", maker: "Bowman", name: "Bowman Sterling", file: "bowman-sterling.png" },
+    { id: "panini-prizm", maker: "Panini", name: "Panini Prizm", file: "panini-prizm.png" },
+    { id: "donruss", maker: "Panini", name: "Donruss", file: "donruss.png" },
+    { id: "diamond-kings", maker: "Panini", name: "Diamond Kings", file: "diamond-kings.jpg" },
+    { id: "upper-deck", maker: "Upper Deck", name: "Upper Deck", file: "upper-deck.png" },
+    { id: "sp-authentic", maker: "Upper Deck", name: "SP Authentic", file: "sp-authentic.png" },
+    { id: "leaf", maker: "Leaf", name: "Leaf", file: "leaf.svg" },
+  ];
+  const brandPick = document.getElementById('brand-pick');
+  [...new Set(SET_LOGOS.map((s) => s.maker))].forEach((maker) => {
+    const group = document.createElement('optgroup');
+    group.label = maker;
+    SET_LOGOS.filter((s) => s.maker === maker).forEach((s) => group.appendChild(new Option(s.name, s.id)));
+    brandPick.appendChild(group);
+  });
+  brandPick.addEventListener('change', async () => {
+    const s = SET_LOGOS.find((x) => x.id === brandPick.value);
+    if (!s) { brand.set(null); return; }
+    const nameEl = document.getElementById('brand-name');
+    nameEl.textContent = 'Loading…';
+    try {
+      const img = await loadImage(`logos/sets/${s.file}`);
+      brand.set(prepareLogo(img), `${s.name} logo`);
+    } catch (e) {
+      nameEl.textContent = 'Could not load that logo';
+    }
+  });
+  // A custom upload or Remove replaces the picked set logo
+  document.getElementById('brand-input').addEventListener('change', () => { brandPick.value = ''; save(); });
+  document.getElementById('brand-clear').addEventListener('click', () => { brandPick.value = ''; save(); });
 
   // ---------- MLB team logos ----------
   const mlbSelect = document.getElementById('mlb-team');
@@ -1211,6 +1399,23 @@ window.MLB_LOGOS = {"ARI":{"name":"Arizona Diamondbacks","svg":"<svg xmlns=\"htt
   const backMode = () => (backRadios.find((r) => r.checked) || {}).value || 'same';
   const qrBack = () => doubleBox.checked && backMode() === 'qr';
 
+  const foldBox = document.getElementById('fold-line');
+
+  // Dashed line across the join, in white or dark gray depending on the border color
+  function drawFoldLine(ctx, w, y) {
+    const n = parseInt((borderColor.value() || '#000000').slice(1), 16);
+    const lum = 0.299 * ((n >> 16) & 255) + 0.587 * ((n >> 8) & 255) + 0.114 * (n & 255);
+    ctx.save();
+    ctx.strokeStyle = lum > 150 ? 'rgba(40,40,40,0.85)' : 'rgba(255,255,255,0.9)';
+    ctx.lineWidth = Math.max(2, Math.round(0.006 * DPI));
+    ctx.setLineDash([0.04 * DPI, 0.025 * DPI]);
+    ctx.beginPath();
+    ctx.moveTo(0, y);
+    ctx.lineTo(w, y);
+    ctx.stroke();
+    ctx.restore();
+  }
+
   function compose() {
     const dbl = doubleBox.checked;
     const w = single.width, h = single.height;
@@ -1224,12 +1429,14 @@ window.MLB_LOGOS = {"ARI":{"name":"Arizona Diamondbacks","svg":"<svg xmlns=\"htt
       ctx.drawImage(qrBack() ? back : single, 0, 0); // top copy becomes the back once folded
       ctx.restore();
       ctx.drawImage(single, 0, h);
+      if (foldBox.checked) drawFoldLine(ctx, w, h);
     } else {
       ctx.drawImage(single, 0, 0);
     }
     canvas.classList.toggle('double', dbl);
     document.getElementById('double-hint').hidden = !dbl;
     document.getElementById('back-side').hidden = !dbl;
+    document.getElementById('fold-line-row').hidden = !dbl;
     document.getElementById('dims').textContent = dbl
       ? '2.5″ × 1.5″ (folds to 2.5″ × 0.75″) · 600 DPI'
       : '2.5″ × 0.75″ · 600 DPI';
@@ -1240,12 +1447,13 @@ window.MLB_LOGOS = {"ARI":{"name":"Arizona Diamondbacks","svg":"<svg xmlns=\"htt
 
   doubleBox.addEventListener('change', update);
   backRadios.forEach((r) => r.addEventListener('change', update));
+  foldBox.addEventListener('change', update);
 
   let raf = 0;
   function update() {
     cancelAnimationFrame(raf);
     raf = requestAnimationFrame(() => {
-      const data = { ...readForm(), logo: logo.img, bg: bg.img };
+      const data = { ...readForm(), logo: logo.img, brand: brand.img, bg: bg.img };
       // With a QR-only back, the QR code lives on the back and is left off the front
       let result = SlabLabel.render(single, qrBack() ? { ...data, qrUrl: '' } : data, DPI);
       if (qrBack()) result = SlabLabel.render(back, { ...data, qrOnly: true }, DPI);
@@ -1265,6 +1473,7 @@ window.MLB_LOGOS = {"ARI":{"name":"Arizona Diamondbacks","svg":"<svg xmlns=\"htt
   document.getElementById('reset').addEventListener('click', () => {
     writeForm({ ...DEFAULTS, yearSet: '', player: '', parallel: '', cardNo: '', serial: '' });
     logo.set(null);
+    brand.set(null);
     bg.set(null);
   });
 
@@ -1351,9 +1560,11 @@ window.MLB_LOGOS = {"ARI":{"name":"Arizona Diamondbacks","svg":"<svg xmlns=\"htt
   const saved = load();
   writeForm(saved || DEFAULTS);
   doubleBox.checked = !!(saved && saved.double);
+  foldBox.checked = !(saved && saved.foldLine === false);
   backRadios.forEach((r) => { r.checked = r.value === ((saved && saved.backMode) || 'same'); });
   if (saved && saved.logoDataUrl) logo.set(saved.logoDataUrl, saved.logoFileName);
   if (saved && saved.bgDataUrl) bg.set(saved.bgDataUrl, saved.bgFileName);
+  if (saved && saved.brandDataUrl) brand.set(saved.brandDataUrl, saved.brandFileName);
 
   update();
   // Re-render once the label font has loaded so canvas text uses Arimo, not a fallback.

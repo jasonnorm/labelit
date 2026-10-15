@@ -11,10 +11,11 @@ Custom 2.5″ × 0.75″ slab labels for Zion SlabMag cases, made in the browser
 - Border color (picker, hex, presets) and thickness
 - QR code from any URL
 - MLB team logo picklist (all 30 primary logos) or your own logo upload
-- Logo position (left, center or right), auto-trimming, size and image effects
+- Logo position (left, top, bottom or right), auto-trimming, size and image effects
+- Manufacturer set logo picklist (26 Topps, Bowman, Panini, Upper Deck and Leaf sets) or upload, placed left, top, under the text or under the serial #
 - Rookie (RC) or HOF badge on the bottom border, in gold, silver, black or the border color
 - Background image (auto-cropped) with opacity and image effects
-- Double-sided fold-over labels, with an optional QR-code-only back
+- Double-sided fold-over labels with a fold line, and an optional QR-code-only back
 - 600 DPI PNG download, Letter-sheet printing with cut lines, or label-printer output
 
 ## Run locally
@@ -29,4 +30,4 @@ When printing, choose **100% / Actual size** so labels come out at exactly 2.5�
 
 ## Trademarks
 
-MLB team logos are trademarks of their respective clubs and Major League Baseball. They are included for personal, non-commercial labeling of your own cards. This project is not affiliated with or endorsed by MLB.
+MLB team logos are trademarks of their respective clubs and Major League Baseball, and set logos in `logos/sets/` are trademarks of Topps, Panini, Upper Deck and Leaf. They are included for personal, non-commercial labeling of your own cards. This project is not affiliated with or endorsed by any of them.
