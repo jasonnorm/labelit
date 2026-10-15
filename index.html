@@ -200,6 +200,46 @@ input[type="range"] { width: 100%; accent-color: var(--focus); }
 .segmented input:checked + span { background: var(--ink); color: var(--panel); }
 .segmented input:focus-visible + span { outline: 2px solid var(--focus); outline-offset: -2px; }
 
+/* Collapsible settings sections */
+.form-toolbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+.form-toolbar h2 { margin: 0; font-size: 1rem; }
+.form-toolbar .btn-ghost { padding: 4px 6px; font-size: 0.8125rem; }
+.group-label {
+  margin: 16px 0 6px; font-size: 0.75rem; font-weight: 600; text-transform: uppercase;
+  letter-spacing: 0.06em; color: var(--muted);
+}
+.section { border: 1px solid var(--line); border-radius: 10px; margin-bottom: 8px; background: var(--panel); }
+.section[open] { border-color: color-mix(in srgb, var(--muted) 45%, var(--line)); }
+.section > summary {
+  list-style: none; display: flex; align-items: center; gap: 10px;
+  padding: 11px 14px; cursor: pointer; user-select: none; border-radius: 10px;
+}
+.section > summary::-webkit-details-marker { display: none; }
+.section > summary::after {
+  content: ""; flex: none; width: 7px; height: 7px; margin-left: 2px;
+  border-right: 2px solid var(--muted); border-bottom: 2px solid var(--muted);
+  transform: rotate(-45deg); transition: transform .15s ease;
+}
+.section[open] > summary::after { transform: rotate(45deg); }
+.section > summary:hover { background: color-mix(in srgb, var(--muted) 8%, transparent); }
+.section > summary:focus-visible { outline: 2px solid var(--focus); outline-offset: -2px; }
+.sec-title { font-weight: 600; font-size: 0.9375rem; white-space: nowrap; }
+.sum {
+  margin-left: auto; min-width: 0; color: var(--muted); font-size: 0.8125rem;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: flex; align-items: center; gap: 6px;
+}
+.sum.on::before { content: ""; flex: none; width: 7px; height: 7px; border-radius: 50%; background: var(--focus); }
+.sum .chip { flex: none; width: 12px; height: 12px; border-radius: 3px; box-shadow: 0 0 0 1px var(--line); }
+.section-body { padding: 4px 14px 14px; }
+.section-body > .field:last-child, .section-body > .hint:last-child { margin-bottom: 0; }
+.section-body .field { margin-bottom: 12px; }
+.section-body .logo-row { margin-bottom: 12px; }
+.caps-check { align-self: end; padding-bottom: 8px; }
+.reset { margin-top: 8px; }
+
+.export-title { margin: 4px 0 0; font-size: 0.8125rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); }
+.double-box { display: grid; gap: 10px; padding: 12px 14px; border: 1px solid var(--line); border-radius: 10px; }
+
 #print-area { display: none; }
 
 @media (max-width: 860px) {
@@ -253,238 +293,267 @@ input[type="range"] { width: 100%; accent-color: var(--focus); }
   <main class="layout">
     <section class="panel form-panel" aria-label="Label details">
       <form id="label-form" autocomplete="off">
-        <fieldset>
-          <legend>Card details</legend>
-
-          <!-- Laid out like the label: three lines on the left, card # top-right, serial # bottom-right.
-               Source order stays 1–5 so Tab moves through the fields in number order. -->
-          <div class="label-grid">
-          <label class="field f-year">
-            <span>1. Year &amp; Set</span>
-            <input name="yearSet" type="text" placeholder="2026 Topps Chrome" maxlength="60" />
-          </label>
-
-          <label class="field f-player">
-            <span>2. Player name</span>
-            <input name="player" type="text" placeholder="Shohei Ohtani" maxlength="60" />
-          </label>
-
-          <label class="field f-parallel">
-            <span>3. Parallel / Description</span>
-            <input name="parallel" type="text" placeholder="Gold Refractor" maxlength="60" />
-          </label>
-
-          <label class="field f-card">
-            <span>4. Card #</span>
-            <input name="cardNo" type="text" placeholder="#150" maxlength="16" />
-          </label>
-          <label class="field f-serial">
-            <span>5. Serial #</span>
-            <input name="serial" type="text" placeholder="125/150" maxlength="16" />
-          </label>
+        <div class="form-toolbar">
+          <h2>Label settings</h2>
+          <div>
+            <button type="button" class="btn-ghost" id="expand-all">Expand all</button>
+            <button type="button" class="btn-ghost" id="collapse-all">Collapse all</button>
           </div>
+        </div>
 
-          <label class="field size-field">
-            <span>Text size <output id="font-size-out">75%</output></span>
-            <input name="fontScale" type="range" min="50" max="100" step="5" value="75" aria-describedby="font-size-hint" />
-          </label>
-          <p class="hint" id="font-size-hint">Long text still shrinks automatically to fit.</p>
-
-          <div class="field">
-            <span>Text weight</span>
-            <div class="segmented" role="radiogroup" aria-label="Text weight">
-              <label><input type="radio" name="fontWeight" value="400" checked /><span>Normal</span></label>
-              <label><input type="radio" name="fontWeight" value="700" /><span style="font-weight:700">Bold</span></label>
+        <p class="group-label">Text</p>
+        <details class="section" id="sec-card" data-section="card" open>
+          <summary><span class="sec-title">Card details</span><span class="sum" id="sum-card"></span></summary>
+          <div class="section-body">
+            <!-- Laid out like the label: three lines on the left, card # top-right, serial # bottom-right.
+                 Source order keeps Tab moving Year, Player, Parallel, Card #, Serial #. -->
+            <div class="label-grid">
+              <label class="field f-year">
+                <span>Year &amp; Set</span>
+                <input name="yearSet" type="text" placeholder="2026 Topps Chrome" maxlength="60" />
+              </label>
+              <label class="field f-player">
+                <span>Player name</span>
+                <input name="player" type="text" placeholder="Shohei Ohtani" maxlength="60" />
+              </label>
+              <label class="field f-parallel">
+                <span>Parallel / Description</span>
+                <input name="parallel" type="text" placeholder="Gold Refractor" maxlength="60" />
+              </label>
+              <label class="field f-card">
+                <span>Card #</span>
+                <input name="cardNo" type="text" placeholder="#150" maxlength="16" />
+              </label>
+              <label class="field f-serial">
+                <span>Serial #</span>
+                <input name="serial" type="text" placeholder="125/150" maxlength="16" />
+              </label>
             </div>
           </div>
-
-          <div class="field text-color">
-            <span>Text color</span>
-            <div class="color-row">
-              <input id="text-color-picker" class="color-input" type="color" value="#111111" aria-label="Text color picker" />
-              <input name="textColor" id="text-color-hex" class="hex-input" type="text" value="#111111" maxlength="7" spellcheck="false" aria-label="Text color hex value" />
-            </div>
-            <div class="swatches" id="text-swatches" role="list" aria-label="Preset text colors"></div>
-          </div>
-
-          <label class="check">
-            <input name="allCaps" type="checkbox" checked />
-            <span>ALL CAPS text</span>
-          </label>
-        </fieldset>
-
-        <fieldset>
-          <legend>6. Border</legend>
-          <div class="color-row">
-            <input id="color-picker" class="color-input" type="color" value="#e10600" aria-label="Border color picker" />
-            <input name="borderColor" id="color-hex" class="hex-input" type="text" value="#E10600" maxlength="7" spellcheck="false" aria-label="Border color hex value" />
-          </div>
-          <div class="swatches" id="swatches" role="list" aria-label="Preset colors"></div>
-          <label class="field size-field logo-size">
-            <span>Thickness <output id="border-out">0.080″</output></span>
-            <input name="border" type="range" min="20" max="80" step="5" value="80" aria-label="Border thickness in thousandths of an inch" />
-          </label>
-        </fieldset>
-
-        <fieldset>
-          <legend>7. QR code <small>(optional)</small></legend>
-          <label class="field">
-            <span>URL</span>
-            <input name="qrUrl" type="url" placeholder="https://example.com/my-card" />
-          </label>
-          <p class="hint">Leave blank for no QR code. Shorter URLs scan more reliably at this size.</p>
-        </fieldset>
-
-        <fieldset>
-          <legend>8. Logo / image <small>(optional)</small></legend>
-          <label class="field">
-            <span>MLB team logo</span>
-            <select name="mlbTeam" id="mlb-team">
-              <option value="">None — or upload your own below</option>
-            </select>
-          </label>
-          <div class="logo-row">
-            <label class="file-btn">
-              <input id="logo-input" type="file" accept="image/*" />
-              <span>Upload image</span>
+        </details>
+        <details class="section" id="sec-text" data-section="text">
+          <summary><span class="sec-title">Text style</span><span class="sum" id="sum-text"></span></summary>
+          <div class="section-body">
+            <label class="field size-field">
+              <span>Text size <output id="font-size-out">75%</output></span>
+              <input name="fontScale" type="range" min="50" max="100" step="5" value="75" aria-describedby="font-size-hint" />
             </label>
-            <button type="button" class="btn-ghost" id="logo-clear" hidden>Remove</button>
-            <span class="logo-name" id="logo-name">No image</span>
-          </div>
-          <div class="field logo-pos">
-            <span>Position</span>
-            <div class="segmented" role="radiogroup" aria-label="Logo position">
-              <label><input type="radio" name="logoPos" value="left" /><span>Left</span></label>
-              <label><input type="radio" name="logoPos" value="top" /><span>Top</span></label>
-              <label><input type="radio" name="logoPos" value="center" checked /><span>Bottom</span></label>
-              <label><input type="radio" name="logoPos" value="right" /><span>Right</span></label>
+            <p class="hint" id="font-size-hint">Long text still shrinks automatically to fit.</p>
+            <div class="row-2">
+              <div class="field">
+                <span>Weight</span>
+                <div class="segmented" role="radiogroup" aria-label="Text weight">
+                  <label><input type="radio" name="fontWeight" value="400" checked /><span>Normal</span></label>
+                  <label><input type="radio" name="fontWeight" value="700" /><span style="font-weight:700">Bold</span></label>
+                </div>
+              </div>
+              <label class="check caps-check">
+                <input name="allCaps" type="checkbox" checked />
+                <span>ALL CAPS</span>
+              </label>
+            </div>
+            <div class="field">
+              <span>Text color</span>
+              <div class="color-row">
+                <input id="text-color-picker" class="color-input" type="color" value="#111111" aria-label="Text color picker" />
+                <input name="textColor" id="text-color-hex" class="hex-input" type="text" value="#111111" maxlength="7" spellcheck="false" aria-label="Text color hex value" />
+              </div>
+              <div class="swatches" id="text-swatches" role="list" aria-label="Preset text colors"></div>
             </div>
           </div>
-          <label class="field size-field logo-size">
-            <span>Logo size <output id="logo-size-out">100%</output></span>
-            <input name="logoScale" type="range" min="50" max="200" step="10" value="100" />
-          </label>
-          <label class="field logo-size">
-            <span>Effect</span>
-            <select name="logoEffect" class="effect">
-              <option value="none">None</option>
-              <option value="bw">Black &amp; white</option>
-              <option value="sepia">Sepia</option>
-              <option value="vintage">Vintage</option>
-              <option value="contrast">High-contrast B&amp;W</option>
-              <option value="warm">Warm</option>
-              <option value="cool">Cool</option>
-              <option value="tint">Tint (border color)</option>
-              <option value="invert">Invert</option>
-            </select>
-          </label>
-          <p class="hint">Blank margins around the image are trimmed automatically. Top and bottom sit centered on the border; left and right get their own column.</p>
-        </fieldset>
+        </details>
 
-        <fieldset>
-          <legend>9. Set logo <small>(optional)</small></legend>
-          <label class="field">
-            <span>Manufacturer set logo</span>
-            <select name="brandPick" id="brand-pick">
-              <option value="">None — or upload your own below</option>
-            </select>
-          </label>
-          <div class="logo-row">
-            <label class="file-btn">
-              <input id="brand-input" type="file" accept="image/*" />
-              <span>Upload set logo</span>
+        <p class="group-label">Look</p>
+        <details class="section" id="sec-border" data-section="border">
+          <summary><span class="sec-title">Border</span><span class="sum" id="sum-border"></span></summary>
+          <div class="section-body">
+            <div class="field">
+              <span>Color</span>
+              <div class="color-row">
+                <input id="color-picker" class="color-input" type="color" value="#e10600" aria-label="Border color picker" />
+                <input name="borderColor" id="color-hex" class="hex-input" type="text" value="#E10600" maxlength="7" spellcheck="false" aria-label="Border color hex value" />
+              </div>
+              <div class="swatches" id="swatches" role="list" aria-label="Preset colors"></div>
+            </div>
+            <label class="field size-field">
+              <span>Thickness <output id="border-out">0.080″</output></span>
+              <input name="border" type="range" min="20" max="80" step="5" value="80" aria-label="Border thickness in thousandths of an inch" />
             </label>
-            <button type="button" class="btn-ghost" id="brand-clear" hidden>Remove</button>
-            <span class="logo-name" id="brand-name">No image</span>
           </div>
-          <div class="field logo-pos">
-            <span>Position</span>
-            <div class="segmented" role="radiogroup" aria-label="Set logo position">
-              <label><input type="radio" name="brandPos" value="left" /><span>Left</span></label>
-              <label><input type="radio" name="brandPos" value="top" /><span>Top</span></label>
-              <label><input type="radio" name="brandPos" value="under-text" checked /><span>Under text</span></label>
-              <label><input type="radio" name="brandPos" value="under-serial" /><span>Under serial #</span></label>
+        </details>
+        <details class="section" id="sec-bg" data-section="bg">
+          <summary><span class="sec-title">Background image</span><span class="sum" id="sum-bg"></span></summary>
+          <div class="section-body">
+            <div class="logo-row">
+              <label class="file-btn">
+                <input id="bg-input" type="file" accept="image/*" />
+                <span>Upload background</span>
+              </label>
+              <button type="button" class="btn-ghost" id="bg-clear" hidden>Remove</button>
+              <span class="logo-name" id="bg-name">No image</span>
             </div>
+            <div class="row-2">
+              <label class="field size-field">
+                <span>Opacity <output id="bg-opacity-out">35%</output></span>
+                <input name="bgOpacity" type="range" min="5" max="100" step="5" value="35" />
+              </label>
+              <label class="field">
+                <span>Effect</span>
+                <select name="bgEffect" class="effect">
+                <option value="none">None</option>
+                <option value="bw">Black &amp; white</option>
+                <option value="sepia">Sepia</option>
+                <option value="vintage">Vintage</option>
+                <option value="contrast">High-contrast B&amp;W</option>
+                <option value="warm">Warm</option>
+                <option value="cool">Cool</option>
+                <option value="tint">Tint (border color)</option>
+                <option value="invert">Invert</option>
+                </select>
+              </label>
+            </div>
+            <p class="hint">Resized and center-cropped to fill the white area. Lower opacity keeps the text readable.</p>
           </div>
-          <label class="field size-field logo-size">
-            <span>Set logo size <output id="brand-size-out">100%</output></span>
-            <input name="brandScale" type="range" min="50" max="200" step="10" value="100" />
-          </label>
-          <label class="field logo-size">
-            <span>Effect</span>
-            <select name="brandEffect" class="effect">
-              <option value="none">None</option>
-              <option value="bw">Black &amp; white</option>
-              <option value="sepia">Sepia</option>
-              <option value="vintage">Vintage</option>
-              <option value="contrast">High-contrast B&amp;W</option>
-              <option value="warm">Warm</option>
-              <option value="cool">Cool</option>
-              <option value="tint">Tint (border color)</option>
-              <option value="invert">Invert</option>
-            </select>
-          </label>
-          <p class="hint">Top sits centered on the top border; under text and under serial # sit on the bottom border; left gets its own column.</p>
-        </fieldset>
+        </details>
 
-        <fieldset>
-          <legend>10. Badge <small>(optional)</small></legend>
-          <div class="field">
-            <span>Badge</span>
-            <div class="segmented" role="radiogroup" aria-label="Badge">
-              <label><input type="radio" name="badge" value="none" checked /><span>None</span></label>
-              <label><input type="radio" name="badge" value="rookie" /><span>Rookie (RC)</span></label>
-              <label><input type="radio" name="badge" value="hof" /><span>HOF</span></label>
-            </div>
-          </div>
-          <div class="row-2">
+        <p class="group-label">Logos &amp; extras</p>
+        <details class="section" id="sec-team" data-section="team">
+          <summary><span class="sec-title">Team logo</span><span class="sum" id="sum-team"></span></summary>
+          <div class="section-body">
             <label class="field">
-              <span>Badge color</span>
-              <select name="badgeColor">
-                <option value="gold">Gold</option>
-                <option value="silver">Silver</option>
-                <option value="black">Black</option>
-                <option value="border">Match border</option>
+              <span>MLB team</span>
+              <select name="mlbTeam" id="mlb-team">
+                <option value="">None — or upload your own below</option>
               </select>
             </label>
-            <label class="field size-field">
-              <span>Badge size <output id="badge-size-out">100%</output></span>
-              <input name="badgeScale" type="range" min="70" max="150" step="10" value="100" />
-            </label>
+            <div class="logo-row">
+              <label class="file-btn">
+                <input id="logo-input" type="file" accept="image/*" />
+                <span>Upload image</span>
+              </label>
+              <button type="button" class="btn-ghost" id="logo-clear" hidden>Remove</button>
+              <span class="logo-name" id="logo-name">No image</span>
+            </div>
+            <div class="field">
+              <span>Position</span>
+              <div class="segmented" role="radiogroup" aria-label="Upload image position">
+                  <label><input type="radio" name="logoPos" value="left" /><span>Left</span></label>
+                  <label><input type="radio" name="logoPos" value="top" /><span>Top</span></label>
+                  <label><input type="radio" name="logoPos" value="center" checked /><span>Bottom</span></label>
+                  <label><input type="radio" name="logoPos" value="right" /><span>Right</span></label>
+              </div>
+            </div>
+            <div class="row-2">
+              <label class="field size-field">
+                <span>Size <output id="logo-size-out">100%</output></span>
+                <input name="logoScale" type="range" min="50" max="200" step="10" value="100" />
+              </label>
+              <label class="field">
+                <span>Effect</span>
+                <select name="logoEffect" class="effect">
+                <option value="none">None</option>
+                <option value="bw">Black &amp; white</option>
+                <option value="sepia">Sepia</option>
+                <option value="vintage">Vintage</option>
+                <option value="contrast">High-contrast B&amp;W</option>
+                <option value="warm">Warm</option>
+                <option value="cool">Cool</option>
+                <option value="tint">Tint (border color)</option>
+                <option value="invert">Invert</option>
+                </select>
+              </label>
+            </div>
+            <p class="hint">Blank margins are trimmed automatically. Top and bottom sit centered on the border; left and right get their own column.</p>
           </div>
-          <p class="hint">Sits centered on the bottom border. A centered logo moves beside it.</p>
-        </fieldset>
-
-        <fieldset>
-          <legend>11. Background image <small>(optional)</small></legend>
-          <div class="logo-row">
-            <label class="file-btn">
-              <input id="bg-input" type="file" accept="image/*" />
-              <span>Upload background</span>
+        </details>
+        <details class="section" id="sec-set" data-section="set">
+          <summary><span class="sec-title">Set logo</span><span class="sum" id="sum-set"></span></summary>
+          <div class="section-body">
+            <label class="field">
+              <span>Manufacturer set</span>
+              <select name="brandPick" id="brand-pick">
+                <option value="">None — or upload your own below</option>
+              </select>
             </label>
-            <button type="button" class="btn-ghost" id="bg-clear" hidden>Remove</button>
-            <span class="logo-name" id="bg-name">No image</span>
+            <div class="logo-row">
+              <label class="file-btn">
+                <input id="brand-input" type="file" accept="image/*" />
+                <span>Upload set logo</span>
+              </label>
+              <button type="button" class="btn-ghost" id="brand-clear" hidden>Remove</button>
+              <span class="logo-name" id="brand-name">No image</span>
+            </div>
+            <div class="field">
+              <span>Position</span>
+              <div class="segmented" role="radiogroup" aria-label="Upload set logo position">
+                  <label><input type="radio" name="brandPos" value="left" /><span>Left</span></label>
+                  <label><input type="radio" name="brandPos" value="top" /><span>Top</span></label>
+                  <label><input type="radio" name="brandPos" value="under-text" checked /><span>Under text</span></label>
+                  <label><input type="radio" name="brandPos" value="under-serial" /><span>Under serial #</span></label>
+              </div>
+            </div>
+            <div class="row-2">
+              <label class="field size-field">
+                <span>Size <output id="brand-size-out">100%</output></span>
+                <input name="brandScale" type="range" min="50" max="200" step="10" value="100" />
+              </label>
+              <label class="field">
+                <span>Effect</span>
+                <select name="brandEffect" class="effect">
+                <option value="none">None</option>
+                <option value="bw">Black &amp; white</option>
+                <option value="sepia">Sepia</option>
+                <option value="vintage">Vintage</option>
+                <option value="contrast">High-contrast B&amp;W</option>
+                <option value="warm">Warm</option>
+                <option value="cool">Cool</option>
+                <option value="tint">Tint (border color)</option>
+                <option value="invert">Invert</option>
+                </select>
+              </label>
+            </div>
+            <p class="hint">Top sits on the top border; under text and under serial # sit on the bottom border; left gets its own column.</p>
           </div>
-          <label class="field size-field logo-size">
-            <span>Opacity <output id="bg-opacity-out">35%</output></span>
-            <input name="bgOpacity" type="range" min="5" max="100" step="5" value="35" />
-          </label>
-          <label class="field logo-size">
-            <span>Effect</span>
-            <select name="bgEffect" class="effect">
-              <option value="none">None</option>
-              <option value="bw">Black &amp; white</option>
-              <option value="sepia">Sepia</option>
-              <option value="vintage">Vintage</option>
-              <option value="contrast">High-contrast B&amp;W</option>
-              <option value="warm">Warm</option>
-              <option value="cool">Cool</option>
-              <option value="tint">Tint (border color)</option>
-              <option value="invert">Invert</option>
-            </select>
-          </label>
-          <p class="hint">The image is resized and center-cropped to fill the white area. Lower opacity keeps the text readable.</p>
-        </fieldset>
+        </details>
+        <details class="section" id="sec-badge" data-section="badge">
+          <summary><span class="sec-title">Badge</span><span class="sum" id="sum-badge"></span></summary>
+          <div class="section-body">
+            <div class="field">
+              <span>Badge</span>
+              <div class="segmented" role="radiogroup" aria-label="Badge">
+                <label><input type="radio" name="badge" value="none" checked /><span>None</span></label>
+                <label><input type="radio" name="badge" value="rookie" /><span>Rookie (RC)</span></label>
+                <label><input type="radio" name="badge" value="hof" /><span>HOF</span></label>
+              </div>
+            </div>
+            <div class="row-2">
+              <label class="field">
+                <span>Color</span>
+                <select name="badgeColor">
+                  <option value="gold">Gold</option>
+                  <option value="silver">Silver</option>
+                  <option value="black">Black</option>
+                  <option value="border">Match border</option>
+                </select>
+              </label>
+              <label class="field size-field">
+                <span>Size <output id="badge-size-out">100%</output></span>
+                <input name="badgeScale" type="range" min="70" max="150" step="10" value="100" />
+              </label>
+            </div>
+            <p class="hint">Sits centered on the bottom border. A bottom team logo moves beside it.</p>
+          </div>
+        </details>
+        <details class="section" id="sec-qr" data-section="qr">
+          <summary><span class="sec-title">QR code</span><span class="sum" id="sum-qr"></span></summary>
+          <div class="section-body">
+            <label class="field">
+              <span>URL</span>
+              <input name="qrUrl" type="url" placeholder="https://example.com/my-card" />
+            </label>
+            <p class="hint">Leave blank for no QR code. Shorter URLs scan more reliably at this size. For double-sided labels you can put it on the back only (see Print &amp; export).</p>
+          </div>
+        </details>
 
         <button type="button" class="btn-ghost reset" id="reset">Reset all fields</button>
       </form>
@@ -500,6 +569,8 @@ input[type="range"] { width: 100%; accent-color: var(--focus); }
       </div>
 
       <div class="export">
+        <h3 class="export-title">Print &amp; export</h3>
+        <div class="double-box">
         <label class="check double-check">
           <input id="double" type="checkbox" />
           <span>Double-sided (fold in half)</span>
@@ -516,6 +587,7 @@ input[type="range"] { width: 100%; accent-color: var(--focus); }
           <span>Show fold line</span>
         </label>
         <p class="hint" id="double-hint" hidden>Prints the label twice, joined along the fold line, with the top copy rotated 180°. Cut around the outside, fold back along the middle, and both sides read upright when you turn the slab over.</p>
+        </div>
         <button type="button" class="btn-primary" id="download">Download PNG</button>
         <div class="print-group">
           <select id="print-mode" aria-label="Print layout">
@@ -1458,6 +1530,7 @@ window.MLB_LOGOS = {"ARI":{"name":"Arizona Diamondbacks","svg":"<svg xmlns=\"htt
       let result = SlabLabel.render(single, qrBack() ? { ...data, qrUrl: '' } : data, DPI);
       if (qrBack()) result = SlabLabel.render(back, { ...data, qrOnly: true }, DPI);
       compose();
+      updateSummaries(data);
       qrInput.classList.toggle('invalid', result.qrTooLong);
       qrInput.title = !result.qrTooLong ? ''
         : typeof window.qrcode !== 'function' ? 'QR library could not load (are you offline?)'
@@ -1465,6 +1538,45 @@ window.MLB_LOGOS = {"ARI":{"name":"Arizona Diamondbacks","svg":"<svg xmlns=\"htt
       save();
     });
   }
+
+  // ---------- section summaries & open state ----------
+  const SECTIONS_KEY = 'labelit:open';
+  const sections = [...document.querySelectorAll('details.section')];
+  const POS_LABEL = { left: 'Left', top: 'Top', center: 'Bottom', right: 'Right', 'under-text': 'Under text', 'under-serial': 'Under serial #' };
+  const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  const stripLogo = (n) => (n || '').replace(/ logo$/, '');
+
+  function setSummary(id, text, on, chip) {
+    const el = document.getElementById(`sum-${id}`);
+    el.classList.toggle('on', !!on);
+    el.innerHTML = (chip ? `<span class="chip" style="background:${esc(chip)}"></span>` : '') + `<span>${esc(text)}</span>`;
+    el.title = text;
+  }
+
+  function updateSummaries(d) {
+    const card = [d.player, d.cardNo, d.serial].map((s) => (s || '').trim()).filter(Boolean).join(' · ');
+    setSummary('card', card || 'Empty', !!card);
+    setSummary('text', `${Math.round(d.fontScale * 100)}% · ${d.fontWeight === 700 ? 'Bold' : 'Normal'}${d.allCaps ? ' · CAPS' : ''}`, false, d.textColor);
+    setSummary('border', `${d.borderColor} · ${d.border.toFixed(3)}″`, false, d.borderColor);
+    setSummary('bg', bg.img ? `${bg.name} · ${Math.round(d.bgOpacity * 100)}%` : 'Off', !!bg.img);
+    setSummary('team', logo.img ? `${stripLogo(logo.name)} · ${POS_LABEL[d.logoPos]}` : 'Off', !!logo.img);
+    setSummary('set', brand.img ? `${stripLogo(brand.name)} · ${POS_LABEL[d.brandPos]}` : 'Off', !!brand.img);
+    const badgeOn = d.badge === 'rookie' || d.badge === 'hof';
+    setSummary('badge', badgeOn ? `${d.badge === 'rookie' ? 'Rookie' : 'HOF'} · ${form.elements.badgeColor.selectedOptions[0].text}` : 'Off', badgeOn);
+    const url = (d.qrUrl || '').trim();
+    setSummary('qr', url ? url.replace(/^https?:\/\//, '') + (qrBack() ? ' · back only' : '') : 'Off', !!url);
+  }
+
+  function saveOpen() {
+    try { localStorage.setItem(SECTIONS_KEY, JSON.stringify(sections.filter((s) => s.open).map((s) => s.dataset.section))); } catch (e) { /* ignore */ }
+  }
+  try {
+    const open = JSON.parse(localStorage.getItem(SECTIONS_KEY));
+    if (Array.isArray(open)) sections.forEach((s) => { s.open = open.includes(s.dataset.section); });
+  } catch (e) { /* first visit: keep defaults */ }
+  sections.forEach((s) => s.addEventListener('toggle', saveOpen));
+  document.getElementById('expand-all').addEventListener('click', () => { sections.forEach((s) => { s.open = true; }); saveOpen(); });
+  document.getElementById('collapse-all').addEventListener('click', () => { sections.forEach((s) => { s.open = false; }); saveOpen(); });
 
   // Hex boxes update the preview themselves once the value is valid
   form.addEventListener('input', (e) => { if (!e.target.classList.contains('hex-input')) update(); });
