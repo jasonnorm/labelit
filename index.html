@@ -1089,6 +1089,24 @@ input[type="range"] { width: 100%; accent-color: var(--focus); }
     const mid = (areaTop + areaBottom) / 2 + capHeight / 2;
     const baselines = [mid - step, mid, mid + step];
 
+    // Left/right logos line up with the text block (which moves when items sit on the borders),
+    // staying inside the white panel.
+    const textMid = (baselines[0] - capHeight + baselines[2]) / 2;
+    const alignToText = (r) => {
+      const pad = SPEC.qrInset / 2;
+      // Largest height that can stay centered on the text without leaving the panel
+      const maxH = 2 * Math.min(textMid - (iy0 + pad), (iy1 - pad) - textMid);
+      if (r.h > maxH && maxH > 0.05) {
+        const f = maxH / r.h;
+        r.x += (r.w - r.w * f) / 2; // stay centered in its column
+        r.w *= f;
+        r.h = maxH;
+      }
+      r.y = Math.min(iy1 - pad - r.h, Math.max(iy0 + pad, textMid - r.h / 2));
+    };
+    if (logoRect && (logoPos === 'left' || logoPos === 'right')) alignToText(logoRect);
+    if (brandRect && brandPos === 'left') alignToText(brandRect);
+
     ctx.fillStyle = data.textColor || SPEC.textColor;
     ctx.textBaseline = 'alphabetic';
 
