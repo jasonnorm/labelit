@@ -15,7 +15,7 @@ Custom 2.5″ × 0.75″ slab labels for Zion SlabMag cases, made in the browser
 - Logo position (left, top, bottom or right), auto-trimming, size and image effects
 - Manufacturer set logo picklist (27 Topps, Bowman, Panini, Upper Deck and Leaf sets) or upload, placed left, top, under the text or under the serial #
 - Rookie (RC) or HOF badge on the bottom border, in gold, silver, black or the border color
-- Background image (auto-cropped) with opacity and image effects
+- Background image: pick any of the 30 MLB ballparks or upload your own; full-width crop with an adjustable vertical position, opacity and image effects
 - Double-sided fold-over labels with a fold line, and an optional QR-code-only back
 - 600 DPI PNG download, Letter-sheet printing with cut lines, or label-printer output
 
@@ -28,6 +28,10 @@ python3 -m http.server 5173
 ```
 
 When printing, choose **100% / Actual size** so labels come out at exactly 2.5″ × 0.75″.
+
+## Credits
+
+Stadium photos are from Wikimedia Commons under Creative Commons licenses; see [CREDITS.md](CREDITS.md) for each photographer and license.
 
 ## Trademarks
 

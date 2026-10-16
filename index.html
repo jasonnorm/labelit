@@ -399,6 +399,12 @@ input[type="range"] { width: 100%; accent-color: var(--focus); }
         <details class="section" id="sec-bg" data-section="bg">
           <summary><span class="sec-title">Background image</span><span class="sum" id="sum-bg"></span></summary>
           <div class="section-body">
+            <label class="field">
+              <span>Stadium</span>
+              <select name="stadium" id="stadium-pick">
+                <option value="">None — or upload your own below</option>
+              </select>
+            </label>
             <div class="logo-row">
               <label class="file-btn">
                 <input id="bg-input" type="file" accept="image/*" />
@@ -427,7 +433,11 @@ input[type="range"] { width: 100%; accent-color: var(--focus); }
                 </select>
               </label>
             </div>
-            <p class="hint">Resized and center-cropped to fill the white area. Lower opacity keeps the text readable.</p>
+            <label class="field size-field">
+              <span>Vertical position <output id="bg-focus-out">Middle</output></span>
+              <input name="bgFocus" type="range" min="0" max="100" step="5" value="50" aria-label="Background vertical position" />
+            </label>
+            <p class="hint">The image keeps its full width and is trimmed top and bottom to fit; slide to choose which band shows. Lower opacity keeps the text readable.</p>
           </div>
         </details>
 
@@ -917,13 +927,15 @@ input[type="range"] { width: 100%; accent-color: var(--focus); }
       return { qrTooLong: !!qrUrl && !qr };
     }
 
-    // Background image: cover-fit (center crop) into the white panel, faded by bgOpacity
+    // Background image: fills the white panel (full width when the photo is taller than the
+    // panel's shape), trimmed top/bottom at bgFocus (0 = top, 1 = bottom), faded by bgOpacity
     if (data.bg && data.bg.naturalWidth) {
       const bgImg = applyEffect(data.bg, data.bgEffect, data.borderColor);
       const pw = (ix1 - ix0) * k, ph = (iy1 - iy0) * k;
       const scale = Math.max(pw / data.bg.naturalWidth, ph / data.bg.naturalHeight);
       const sw = pw / scale, sh = ph / scale;
-      const sx = (data.bg.naturalWidth - sw) / 2, sy = (data.bg.naturalHeight - sh) / 2;
+      const focus = data.bgFocus == null ? 0.5 : Math.max(0, Math.min(1, data.bgFocus));
+      const sx = (data.bg.naturalWidth - sw) / 2, sy = (data.bg.naturalHeight - sh) * focus;
       ctx.save();
       ctx.clip();
       ctx.globalAlpha = Math.max(0, Math.min(1, data.bgOpacity == null ? 0.35 : data.bgOpacity));
@@ -1180,6 +1192,8 @@ input[type="range"] { width: 100%; accent-color: var(--focus); }
     logoScale: 100,
     logoPos: 'center',
     bgOpacity: 35,
+    bgFocus: 50,
+    stadium: '',
     border: 80,
   };
   const PRESETS = [
@@ -1223,6 +1237,8 @@ input[type="range"] { width: 100%; accent-color: var(--focus); }
       logoScale: Number(el.logoScale.value) / 100,
       logoPos: el.logoPos.value || 'center',
       bgOpacity: Number(el.bgOpacity.value) / 100,
+      bgFocus: Number(el.bgFocus.value) / 100,
+      stadium: el.stadium.value,
       border: Number(el.border.value) / 1000,
     };
   }
@@ -1236,6 +1252,8 @@ input[type="range"] { width: 100%; accent-color: var(--focus); }
     el.logoScale.value = s.logoScale ? (s.logoScale <= 2 ? s.logoScale * 100 : s.logoScale) : 100;
     el.logoPos.value = s.logoPos || 'center';
     el.bgOpacity.value = s.bgOpacity != null ? (s.bgOpacity <= 1 ? s.bgOpacity * 100 : s.bgOpacity) : 35;
+    el.bgFocus.value = s.bgFocus != null ? Math.round(s.bgFocus <= 1 ? s.bgFocus * 100 : s.bgFocus) : 50;
+    if (s.stadium !== undefined) el.stadium.value = s.stadium || '';
     el.border.value = s.border ? (s.border < 1 ? Math.round(s.border * 1000) : s.border) : 80;
     syncFontSizeOut();
     el.logoEffect.value = s.logoEffect || 'none';
@@ -1288,11 +1306,13 @@ input[type="range"] { width: 100%; accent-color: var(--focus); }
     document.getElementById('font-size-out').textContent = form.elements.fontScale.value + '%';
     document.getElementById('logo-size-out').textContent = form.elements.logoScale.value + '%';
     document.getElementById('bg-opacity-out').textContent = form.elements.bgOpacity.value + '%';
+    const f = Number(form.elements.bgFocus.value);
+    document.getElementById('bg-focus-out').textContent = f <= 10 ? 'Top' : f >= 90 ? 'Bottom' : f === 50 ? 'Middle' : `${f}%`;
     document.getElementById('badge-size-out').textContent = form.elements.badgeScale.value + '%';
     document.getElementById('brand-size-out').textContent = form.elements.brandScale.value + '%';
     document.getElementById('border-out').textContent = (form.elements.border.value / 1000).toFixed(3) + '″';
   }
-  ['fontScale', 'logoScale', 'bgOpacity', 'border', 'badgeScale', 'brandScale'].forEach((n) => form.elements[n].addEventListener('input', syncFontSizeOut));
+  ['fontScale', 'logoScale', 'bgOpacity', 'border', 'badgeScale', 'brandScale', 'bgFocus'].forEach((n) => form.elements[n].addEventListener('input', syncFontSizeOut));
 
   // ---------- color ----------
   function normalizeHex(v) {
@@ -1429,21 +1449,33 @@ input[type="range"] { width: 100%; accent-color: var(--focus); }
     return out.toDataURL('image/png');
   }
 
-  // Background: center-crop to the white panel's shape at its largest (thinnest border), at 600 DPI.
+  // Background: keep the whole photo (the label crop happens at render time, so the visible
+  // band can be moved), sized so its width covers the panel at 600 DPI without being huge.
   function prepareBackground(img) {
     const S = SlabLabel.SPEC;
-    const pw = Math.round((S.width - S.minBorder * 2) * DPI);
-    const ph = Math.round((S.height - S.minBorder * 2) * DPI);
-    const scale = Math.max(pw / img.naturalWidth, ph / img.naturalHeight);
-    const sw = pw / scale, sh = ph / scale;
+    const panelW = Math.round((S.width - S.minBorder * 2) * DPI);
+    const panelH = Math.round((S.height - S.minBorder * 2) * DPI);
+    // Smallest size that still covers the panel at full resolution, capped at 1600px wide
+    const cover = Math.max(panelW / img.naturalWidth, panelH / img.naturalHeight);
+    const scale = Math.min(1, Math.max(cover, 1600 / img.naturalWidth));
+    let cur = img, w = img.naturalWidth, h = img.naturalHeight;
+    const tw = Math.max(1, Math.round(w * scale)), th = Math.max(1, Math.round(h * scale));
+    while (w / 2 >= tw && h / 2 >= th) { // halving steps keep the downscale smooth
+      const c = document.createElement('canvas');
+      c.width = Math.round(w / 2); c.height = Math.round(h / 2);
+      const cx = c.getContext('2d');
+      cx.imageSmoothingQuality = 'high';
+      cx.drawImage(cur, 0, 0, c.width, c.height);
+      cur = c; w = c.width; h = c.height;
+    }
     const out = document.createElement('canvas');
-    out.width = pw; out.height = ph;
+    out.width = tw; out.height = th;
     const o = out.getContext('2d');
     o.fillStyle = '#fff';
-    o.fillRect(0, 0, pw, ph);
+    o.fillRect(0, 0, tw, th);
     o.imageSmoothingQuality = 'high';
-    o.drawImage(img, (img.naturalWidth - sw) / 2, (img.naturalHeight - sh) / 2, sw, sh, 0, 0, pw, ph);
-    return out.toDataURL('image/jpeg', 0.92);
+    o.drawImage(cur, 0, 0, tw, th);
+    return out.toDataURL('image/jpeg', 0.9);
   }
 
   function imageSlot(prefix, prepare) {
@@ -1548,6 +1580,62 @@ input[type="range"] { width: 100%; accent-color: var(--focus); }
   // A custom upload or Remove replaces the picked set logo
   document.getElementById('brand-input').addEventListener('change', () => { brandPick.value = ''; save(); });
   document.getElementById('brand-clear').addEventListener('click', () => { brandPick.value = ''; save(); });
+
+  // ---------- Stadium backgrounds (files in backgrounds/stadiums/) ----------
+  // Photos from Wikimedia Commons; authors and licenses are listed in CREDITS.md.
+  const STADIUMS = [
+    { team: "MIL", park: "American Family Field", file: "MIL.jpg", focus: 0.6 },
+    { team: "LAA", park: "Angel Stadium", file: "LAA.jpg", focus: 0.6 },
+    { team: "STL", park: "Busch Stadium", file: "STL.jpg", focus: 0.6 },
+    { team: "ARI", park: "Chase Field", file: "ARI.jpg", focus: 0.5 },
+    { team: "NYM", park: "Citi Field", file: "NYM.jpg", focus: 0.65 },
+    { team: "PHI", park: "Citizens Bank Park", file: "PHI.jpg", focus: 0.6 },
+    { team: "DET", park: "Comerica Park", file: "DET.jpg", focus: 0.65 },
+    { team: "COL", park: "Coors Field", file: "COL.jpg", focus: 0.55 },
+    { team: "HOU", park: "Daikin Park", file: "HOU.jpg", focus: 0.75 },
+    { team: "LAD", park: "Dodger Stadium", file: "LAD.jpg", focus: 0.62 },
+    { team: "BOS", park: "Fenway Park", file: "BOS.jpg", focus: 0.55 },
+    { team: "TEX", park: "Globe Life Field", file: "TEX.jpg", focus: 0.55 },
+    { team: "CIN", park: "Great American Ball Park", file: "CIN.jpg", focus: 0.6 },
+    { team: "KC", park: "Kauffman Stadium", file: "KC.jpg", focus: 0.65 },
+    { team: "MIA", park: "loanDepot park", file: "MIA.jpg", focus: 0.65 },
+    { team: "WSH", park: "Nationals Park", file: "WSH.jpg", focus: 0.65 },
+    { team: "SF", park: "Oracle Park", file: "SF.jpg", focus: 0.6 },
+    { team: "BAL", park: "Oriole Park at Camden Yards", file: "BAL.jpg", focus: 0.45 },
+    { team: "SD", park: "Petco Park", file: "SD.jpg", focus: 0.65 },
+    { team: "PIT", park: "PNC Park", file: "PIT.jpg", focus: 0.6 },
+    { team: "CLE", park: "Progressive Field", file: "CLE.jpg", focus: 0.6 },
+    { team: "CWS", park: "Rate Field", file: "CWS.jpg", focus: 0.5 },
+    { team: "TOR", park: "Rogers Centre", file: "TOR.jpg", focus: 0.55 },
+    { team: "ATH", park: "Sutter Health Park", file: "ATH.jpg", focus: 0.6 },
+    { team: "SEA", park: "T-Mobile Park", file: "SEA.jpg", focus: 0.55 },
+    { team: "MIN", park: "Target Field", file: "MIN.jpg", focus: 0.6 },
+    { team: "TB", park: "Tropicana Field", file: "TB.jpg", focus: 0.85 },
+    { team: "ATL", park: "Truist Park", file: "ATL.jpg", focus: 0.5 },
+    { team: "CHC", park: "Wrigley Field", file: "CHC.jpg", focus: 0.55 },
+    { team: "NYY", park: "Yankee Stadium", file: "NYY.jpg", focus: 0.6 },
+  ];
+  const stadiumPick = document.getElementById('stadium-pick');
+  function fillStadiums() {
+    STADIUMS.forEach((s) => stadiumPick.add(new Option(`${s.park} — ${MLB_TEAMS[s.team] || s.team}`, s.team)));
+  }
+  stadiumPick.addEventListener('change', async () => {
+    const s = STADIUMS.find((x) => x.team === stadiumPick.value);
+    if (!s) { bg.set(null); return; }
+    const nameEl = document.getElementById('bg-name');
+    nameEl.textContent = 'Loading…';
+    try {
+      const img = await loadImage(`backgrounds/stadiums/${s.file}`);
+      if (stadiumPick.value !== s.team) return;
+      form.elements.bgFocus.value = Math.round((s.focus == null ? 0.5 : s.focus) * 100);
+      syncFontSizeOut();
+      bg.set(prepareBackground(img), s.park);
+    } catch (e) {
+      nameEl.textContent = 'Could not load that photo (open the site, not the file)';
+    }
+  });
+  document.getElementById('bg-input').addEventListener('change', () => { stadiumPick.value = ''; save(); });
+  document.getElementById('bg-clear').addEventListener('click', () => { stadiumPick.value = ''; save(); });
 
   // ---------- Team colors (for "Match team logo color") ----------
   const TEAM_COLORS = {
@@ -1908,6 +1996,7 @@ input[type="range"] { width: 100%; accent-color: var(--focus); }
   });
 
   // ---------- init ----------
+  fillStadiums();
   const saved = load();
   writeForm(saved || DEFAULTS);
   doubleBox.checked = !!(saved && saved.double);
