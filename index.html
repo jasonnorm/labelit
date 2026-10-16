@@ -521,6 +521,7 @@ input[type="range"] { width: 100%; accent-color: var(--focus); }
               <div class="segmented" role="radiogroup" aria-label="Upload set logo position">
                   <label><input type="radio" name="brandPos" value="left" /><span>Left</span></label>
                   <label><input type="radio" name="brandPos" value="top" /><span>Top</span></label>
+                  <label><input type="radio" name="brandPos" value="bottom" /><span>Bottom</span></label>
                   <label><input type="radio" name="brandPos" value="under-text" checked /><span>Under text</span></label>
                   <label><input type="radio" name="brandPos" value="under-serial" /><span>Under serial #</span></label>
               </div>
@@ -545,7 +546,7 @@ input[type="range"] { width: 100%; accent-color: var(--focus); }
                 </select>
               </label>
             </div>
-            <p class="hint">Top sits on the top border; under text and under serial # sit on the bottom border; left gets its own column.</p>
+            <p class="hint">Top and bottom sit centered on the border (sharing the bottom with a badge or team logo); under text and under serial # sit on the bottom border at the sides; left gets its own column.</p>
           </div>
         </details>
         <details class="section" id="sec-badge" data-section="badge">
@@ -1048,6 +1049,11 @@ input[type="range"] { width: 100%; accent-color: var(--focus); }
         const boxH = SPEC.brandBox.height * s;
         const { w, h: bh } = contain(SPEC.brandBox.width * s, boxH);
         brandRect = { x: (SPEC.width - w) / 2, y: topBoxTop + boxH / 2 - bh / 2, w, h: bh };
+      } else if (brandPos === 'bottom') {
+        const boxH = SPEC.brandBox.height * s;
+        const { w, h: bh } = contain(SPEC.brandBox.width * s, boxH);
+        const boxBottom = Math.min(SPEC.height - SPEC.edgePad, iy1 + (SPEC.logoBox.top + SPEC.logoBox.height - (SPEC.height - SPEC.border)));
+        brandRect = { x: (SPEC.width - w) / 2, y: boxBottom - boxH / 2 - bh / 2, w, h: bh };
       } else if (brandPos === 'left') {
         const maxH = (iy1 - iy0) - SPEC.qrInset * 2;
         const { w, h: bh } = contain(SPEC.logoSide.width * s, Math.min(maxH, SPEC.logoSide.height * s));
@@ -1072,6 +1078,14 @@ input[type="range"] { width: 100%; accent-color: var(--focus); }
       }
     }
 
+    // Items centered on the bottom border (team logo, badge, set logo) share one centered row
+    const bottomRow = [logoPos === 'center' && logoRect, badgeRect, brandPos === 'bottom' && brandRect].filter(Boolean);
+    if (bottomRow.length > 1) {
+      const gap = SPEC.logoBadgeGap;
+      let x = (SPEC.width - bottomRow.reduce((sum, r) => sum + r.w, 0) - gap * (bottomRow.length - 1)) / 2;
+      bottomRow.forEach((r) => { r.x = x; x += r.w + gap; });
+    }
+
     // Both logos on top: place them side by side as a centered pair
     if (logoRect && brandRect && logoPos === 'top' && brandPos === 'top') {
       const gap = SPEC.logoBadgeGap;
@@ -1085,7 +1099,7 @@ input[type="range"] { width: 100%; accent-color: var(--focus); }
 
     let areaBottom = logoRect && logoPos === 'center' ? Math.min(iy1, logoRect.y) : iy1;
     if (badgeRect) areaBottom = Math.min(areaBottom, badgeRect.y);
-    if (brandRect && (brandPos === 'under-text' || brandPos === 'under-serial')) areaBottom = Math.min(areaBottom, brandRect.y);
+    if (brandRect && (brandPos === 'bottom' || brandPos === 'under-text' || brandPos === 'under-serial')) areaBottom = Math.min(areaBottom, brandRect.y);
 
     // The 3-line block is ~3x the font size tall; shrink if it can't fit above the logo
     const [b0, b1] = SPEC.baselines;
@@ -1869,7 +1883,7 @@ input[type="range"] { width: 100%; accent-color: var(--focus); }
   // ---------- section summaries & open state ----------
   const SECTIONS_KEY = 'labelit:open';
   const sections = [...document.querySelectorAll('details.section')];
-  const POS_LABEL = { left: 'Left', top: 'Top', center: 'Bottom', right: 'Right', 'under-text': 'Under text', 'under-serial': 'Under serial #' };
+  const POS_LABEL = { left: 'Left', top: 'Top', center: 'Bottom', bottom: 'Bottom', right: 'Right', 'under-text': 'Under text', 'under-serial': 'Under serial #' };
   const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
   const stripLogo = (n) => (n || '').replace(/ logo$/, '');
 
