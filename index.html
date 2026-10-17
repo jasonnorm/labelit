@@ -2073,8 +2073,21 @@ input[type="range"] { width: 100%; accent-color: var(--focus); }
     const open = JSON.parse(localStorage.getItem(SECTIONS_KEY));
     if (Array.isArray(open)) sections.forEach((s) => { s.open = open.includes(s.dataset.section); });
   } catch (e) { /* first visit: keep defaults */ }
-  sections.forEach((s) => s.addEventListener('toggle', saveOpen));
-  document.getElementById('expand-all').addEventListener('click', () => { sections.forEach((s) => { s.open = true; }); saveOpen(); });
+  // Accordion: opening a section closes the others (except right after "Expand all")
+  let bulkUntil = 0;
+  sections.forEach((s) => s.addEventListener('toggle', () => {
+    if (s.open && performance.now() > bulkUntil) {
+      sections.forEach((o) => { if (o !== s && o.open) o.open = false; });
+      // The section above may have collapsed; keep the one just opened in view
+      requestAnimationFrame(() => s.querySelector('summary').scrollIntoView({ block: 'nearest', behavior: 'smooth' }));
+    }
+    saveOpen();
+  }));
+  document.getElementById('expand-all').addEventListener('click', () => {
+    bulkUntil = performance.now() + 500;
+    sections.forEach((s) => { s.open = true; });
+    saveOpen();
+  });
   document.getElementById('collapse-all').addEventListener('click', () => { sections.forEach((s) => { s.open = false; }); saveOpen(); });
 
   // Hex boxes update the preview themselves once the value is valid
