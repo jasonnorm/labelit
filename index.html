@@ -1733,6 +1733,7 @@ input[type="range"] { width: 100%; accent-color: var(--focus); }
     { id: "hist-ATL", team: "ATL", park: "Atlanta\u2013Fulton County Stadium", years: "1966\u20131996", file: "historic/ATL.jpg", focus: 0.55 },
     { id: "hist-STL", team: "STL", park: "Busch Memorial Stadium", years: "1966\u20132005", file: "historic/STL.jpg", focus: 0.6 },
     { id: "hist-CLE", team: "CLE", park: "Cleveland Municipal Stadium", years: "1932\u20131993", file: "historic/CLE.jpg", focus: 0.7 },
+    { id: "hist-SF", team: "SF", park: "Candlestick Park", years: "1960\u20131999", file: "historic/SF-candlestick.jpg", focus: 0.48 },
     { id: "hist-CWS", team: "CWS", park: "Comiskey Park", years: "1910\u20131990", file: "historic/CWS.jpg", focus: 0.45 },
     { id: "hist-CIN", team: "CIN", park: "Crosley Field", years: "1912\u20131970", file: "historic/CIN.jpg", focus: 0.5 },
     { id: "hist-LAD", team: "LAD", park: "Ebbets Field", years: "1913\u20131957", file: "historic/LAD.jpg", focus: 0.45 },
@@ -1742,7 +1743,7 @@ input[type="range"] { width: 100%; accent-color: var(--focus); }
     { id: "hist-SD", team: "SD", park: "Jack Murphy Stadium", years: "1969\u20132003", file: "historic/SD.jpg", focus: 0.5 },
     { id: "hist-MIA", team: "MIA", park: "Joe Robbie Stadium", years: "1993\u20132011", file: "historic/MIA.jpg", focus: 0.45 },
     { id: "hist-KC", team: "KC", park: "Kansas City Municipal Stadium", years: "1955\u20131972", file: "historic/KC.jpg", focus: 0.5 },
-    { id: "hist-SF", team: "SF", park: "Polo Grounds", years: "1910", file: "historic/SF.jpg", focus: 0.5 },
+    { id: "hist-SF-polo", team: "SF", park: "Polo Grounds", years: "1910, New York Giants", file: "historic/SF-polo.jpg", focus: 0.5 },
     { id: "hist-SEA", team: "SEA", park: "Kingdome", years: "1977\u20131999", file: "historic/SEA.jpg", focus: 0.45 },
     { id: "hist-BAL", team: "BAL", park: "Memorial Stadium", years: "1954\u20131991", file: "historic/BAL.jpg", focus: 0.55 },
     { id: "hist-MIN", team: "MIN", park: "Metropolitan Stadium", years: "1961\u20131981", file: "historic/MIN.jpg", focus: 0.5 },
@@ -1767,21 +1768,27 @@ input[type="range"] { width: 100%; accent-color: var(--focus); }
       stadiumPick.appendChild(g);
     });
   }
-  stadiumPick.addEventListener('change', async () => {
+  // resetBand: true when picked by the user (jump to the park's starting band),
+  // false when restoring saved settings (keep the band they chose)
+  async function loadStadium(resetBand) {
     const s = [...STADIUMS, ...HISTORIC_PARKS].find((x) => stadiumId(x) === stadiumPick.value);
-    if (!s) { bg.set(null); return; }
+    if (!s) { if (resetBand) bg.set(null); return false; }
     const nameEl = document.getElementById('bg-name');
     nameEl.textContent = 'Loading…';
     try {
       const img = await loadImage(`backgrounds/stadiums/${s.file}`);
-      if (stadiumPick.value !== stadiumId(s)) return;
-      form.elements.bgFocus.value = Math.round((s.focus == null ? 0.5 : s.focus) * 100);
-      syncFontSizeOut();
+      if (stadiumPick.value !== stadiumId(s)) return true;
+      if (resetBand) {
+        form.elements.bgFocus.value = Math.round((s.focus == null ? 0.5 : s.focus) * 100);
+        syncFontSizeOut();
+      }
       bg.set(prepareBackground(img), s.park);
     } catch (e) {
       nameEl.textContent = 'Could not load that photo (open the site, not the file)';
     }
-  });
+    return true;
+  }
+  stadiumPick.addEventListener('change', () => loadStadium(true));
   document.getElementById('bg-input').addEventListener('change', () => { stadiumPick.value = ''; save(); });
   document.getElementById('bg-clear').addEventListener('click', () => { stadiumPick.value = ''; save(); });
 
@@ -2190,7 +2197,9 @@ input[type="range"] { width: 100%; accent-color: var(--focus); }
   foldBox.checked = !(saved && saved.foldLine === false);
   backRadios.forEach((r) => { r.checked = r.value === ((saved && saved.backMode) || 'same'); });
   if (saved && saved.logoDataUrl) logo.set(saved.logoDataUrl, saved.logoFileName);
-  if (saved && saved.bgDataUrl) bg.set(saved.bgDataUrl, saved.bgFileName);
+  // A saved stadium is reloaded from its file so updated photos show up; uploads come from storage
+  if (saved && saved.stadium && STADIUMS.concat(HISTORIC_PARKS).some((s) => stadiumId(s) === saved.stadium)) loadStadium(false);
+  else if (saved && saved.bgDataUrl) bg.set(saved.bgDataUrl, saved.bgFileName);
   if (saved && saved.brandDataUrl) brand.set(saved.brandDataUrl, saved.brandFileName);
 
   update();
