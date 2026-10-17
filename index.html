@@ -591,6 +591,16 @@ input[type="range"] { width: 100%; accent-color: var(--focus); }
                 <label><input type="radio" name="badge" value="hof" /><span>HOF</span></label>
               </div>
             </div>
+            <div class="field">
+              <span>Position <output class="pos-current" data-for="badgePos"></output></span>
+              <div class="pos-map" role="radiogroup" aria-label="Badge position">
+                <div class="pos-art" aria-hidden="true"><i class="l1"></i><i class="l2"></i><i class="l3"></i><i class="n1"></i><i class="n3"></i></div>
+                <label class="spot" style="--x:50%;--y:6%" title="Top"><input type="radio" name="badgePos" value="top" aria-label="Top" /><span></span></label>
+                <label class="spot" style="--x:50%;--y:94%" title="Bottom"><input type="radio" name="badgePos" value="bottom" aria-label="Bottom" checked /><span></span></label>
+                <label class="spot" style="--x:28%;--y:94%" title="Under text"><input type="radio" name="badgePos" value="under-text" aria-label="Under text" /><span></span></label>
+                <label class="spot" style="--x:86%;--y:94%" title="Under serial #"><input type="radio" name="badgePos" value="under-serial" aria-label="Under serial #" /><span></span></label>
+              </div>
+            </div>
             <div class="row-2">
               <label class="field">
                 <span>Color</span>
@@ -606,7 +616,7 @@ input[type="range"] { width: 100%; accent-color: var(--focus); }
                 <input name="badgeScale" type="range" min="70" max="150" step="10" value="100" />
               </label>
             </div>
-            <p class="hint">Sits centered on the bottom border. A bottom team logo moves beside it.</p>
+            <p class="hint">Click a spot on the label. Items sharing a spot (logos, badge) line up side by side.</p>
           </div>
         </details>
         <details class="section" id="sec-qr" data-section="qr">
@@ -616,6 +626,14 @@ input[type="range"] { width: 100%; accent-color: var(--focus); }
               <span>URL</span>
               <input name="qrUrl" type="url" placeholder="https://example.com/my-card" />
             </label>
+            <div class="field">
+              <span>Position <output class="pos-current" data-for="qrPos"></output></span>
+              <div class="pos-map" role="radiogroup" aria-label="QR code position">
+                <div class="pos-art" aria-hidden="true"><i class="l1"></i><i class="l2"></i><i class="l3"></i><i class="n1"></i><i class="n3"></i></div>
+                <label class="spot" style="--x:9%;--y:50%" title="Left"><input type="radio" name="qrPos" value="left" aria-label="Left" checked /><span></span></label>
+                <label class="spot" style="--x:91%;--y:50%" title="Right"><input type="radio" name="qrPos" value="right" aria-label="Right" /><span></span></label>
+              </div>
+            </div>
             <p class="hint">Leave blank for no QR code. Shorter URLs scan more reliably at this size. For double-sided labels you can put it on the back only (see Print &amp; export).</p>
           </div>
         </details>
@@ -976,16 +994,19 @@ input[type="range"] { width: 100%; accent-color: var(--focus); }
       ctx.restore();
     }
 
-    // QR code (left side, full panel height so it stays scannable)
+    // QR code: a full-height column on the left or right so it stays scannable
     let textLeft = ix0 + SPEC.padX;
+    let right = ix1 - SPEC.padX;        // right edge of the card # / serial # column
+    let rightCol = ix1 - SPEC.qrInset;  // where a right-side logo column ends
+    const qrPos = data.qrPos === 'right' ? 'right' : 'left';
     if (qr) {
       const size = (iy1 - iy0) - SPEC.qrInset * 2;
-      drawQr(ctx, qr, (ix0 + SPEC.qrInset) * k, (iy0 + SPEC.qrInset) * k, size * k);
-      textLeft = ix0 + SPEC.qrInset + size + SPEC.qrGap;
+      const qx = qrPos === 'right' ? ix1 - SPEC.qrInset - size : ix0 + SPEC.qrInset;
+      drawQr(ctx, qr, qx * k, (iy0 + SPEC.qrInset) * k, size * k);
+      if (qrPos === 'right') { right = qx - SPEC.qrGap; rightCol = right; }
+      else textLeft = qx + size + SPEC.qrGap;
     }
 
-    // Right column: card # (top) and serial # (bottom), right-aligned
-    let right = ix1 - SPEC.padX;
     const lines = [tx(data.yearSet), tx(data.player), tx(data.parallel)];
     const cardNo = tx(data.cardNo);
     const serial = tx(data.serial);
@@ -1040,28 +1061,26 @@ input[type="range"] { width: 100%; accent-color: var(--focus); }
         const { w, h: lh } = contain(SPEC.logoSide.width * s, Math.min(maxH, SPEC.logoSide.height * s));
         const y = (iy0 + iy1) / 2 - lh / 2;
         if (logoPos === 'left') {
-          const x = qr ? textLeft : ix0 + SPEC.qrInset; // sits right of the QR code when there is one
+          const x = qr && qrPos === 'left' ? textLeft : ix0 + SPEC.qrInset; // sits right of a left QR code
           logoRect = { x, y, w, h: lh };
           textLeft = x + w + SPEC.qrGap;
         } else {
-          const x = ix1 - SPEC.qrInset - w;
+          const x = rightCol - w; // sits left of a right QR code
           logoRect = { x, y, w, h: lh };
           right = x - SPEC.qrGap;
         }
       }
     }
-    // Rookie / HOF badge: centered on the bottom border. A centered logo moves beside it.
+    // Rookie / HOF badge: on the top or bottom border (x is set when the slots are laid out)
     let badgeRect = null;
+    const badgePos = ['top', 'under-text', 'under-serial'].includes(data.badgePos) ? data.badgePos : 'bottom';
     if (data.badge === 'rookie' || data.badge === 'hof') {
       const bh = SPEC.badgeHeight * (data.badgeScale || 1);
       const bw = data.badge === 'rookie' ? bh * 0.95 : bh * 2.2;
-      const cy = Math.min(iy1, SPEC.height - SPEC.edgePad - bh / 2);
+      const cy = badgePos === 'top'
+        ? Math.max(iy0, SPEC.edgePad + bh / 2)
+        : Math.min(iy1, SPEC.height - SPEC.edgePad - bh / 2);
       badgeRect = { x: (SPEC.width - bw) / 2, y: cy - bh / 2, w: bw, h: bh };
-      if (logoRect && logoPos === 'center') {
-        const groupW = logoRect.w + SPEC.logoBadgeGap + bw;
-        logoRect.x = (SPEC.width - groupW) / 2;
-        badgeRect.x = logoRect.x + logoRect.w + SPEC.logoBadgeGap;
-      }
     }
 
     // Manufacturer set logo. Left: its own column (after a left QR code / team logo).
@@ -1103,45 +1122,43 @@ input[type="range"] { width: 100%; accent-color: var(--focus); }
         brandRect = { x, y: (iy0 + iy1) / 2 - bh / 2, w, h: bh };
         textLeft = x + w + SPEC.qrGap;
       } else {
-        const box = SPEC.brandBox;
-        const boxH = box.height * s;
-        const center = [logoPos === 'center' ? logoRect : null, badgeRect].filter(Boolean);
-        const gap = SPEC.logoBadgeGap;
-        let x0 = textLeft, x1 = right;
-        if (brandPos === 'under-text') {
-          if (center.length) x1 = Math.min(...center.map((r) => r.x)) - gap;
-        } else if (center.length) {
-          x0 = Math.max(...center.map((r) => r.x + r.w)) + gap;
-        }
-        const { w, h: bh } = contain(Math.min(box.width * s, x1 - x0), boxH);
+        const boxH = SPEC.brandBox.height * s;
+        const { w, h: bh } = contain(SPEC.brandBox.width * s, boxH);
         const boxBottom = Math.min(SPEC.height - SPEC.edgePad, iy1 + (SPEC.logoBox.top + SPEC.logoBox.height - (SPEC.height - SPEC.border)));
-        const y = boxBottom - boxH / 2 - bh / 2;
-        brandRect = { x: brandPos === 'under-text' ? x0 : x1 - w, y, w, h: bh };
+        brandRect = { x: 0, y: boxBottom - boxH / 2 - bh / 2, w, h: bh };
       }
     }
 
-    // Items centered on the bottom border (team logo, badge, set logo) share one centered row
-    const bottomRow = [logoPos === 'center' && logoRect, badgeRect, brandPos === 'bottom' && brandRect].filter(Boolean);
-    if (bottomRow.length > 1) {
-      const gap = SPEC.logoBadgeGap;
-      let x = (SPEC.width - bottomRow.reduce((sum, r) => sum + r.w, 0) - gap * (bottomRow.length - 1)) / 2;
-      bottomRow.forEach((r) => { r.x = x; x += r.w + gap; });
-    }
+    // Border slots: items sharing a slot sit side by side.
+    //   top / bottom: centered rows; under-text: from the text's left edge; under-serial: ending at the numbers' right edge
+    const inSlot = (slot) => [
+      logoRect && ((slot === 'top' && logoPos === 'top') || (slot === 'bottom' && logoPos === 'center')) && logoRect,
+      badgeRect && badgePos === slot && badgeRect,
+      brandRect && brandPos === slot && brandRect,
+    ].filter(Boolean);
+    const gap = SPEC.logoBadgeGap;
+    const rowWidth = (row) => row.reduce((sum, r) => sum + r.w, 0) + gap * Math.max(0, row.length - 1);
+    const placeRow = (row, x) => row.forEach((r) => { r.x = x; x += r.w + gap; });
+    const shrinkRow = (row, maxW) => {   // scale a side slot down so it doesn't run into the center row
+      const w = rowWidth(row);
+      if (w <= maxW || maxW <= 0.05) return;
+      const f = (maxW - gap * (row.length - 1)) / (w - gap * (row.length - 1));
+      row.forEach((r) => { r.y += (r.h - r.h * f) / 2; r.w *= f; r.h *= f; });
+    };
+    const top = inSlot('top'), bottom = inSlot('bottom'), under = inSlot('under-text'), underSerial = inSlot('under-serial');
+    placeRow(top, (SPEC.width - rowWidth(top)) / 2);
+    placeRow(bottom, (SPEC.width - rowWidth(bottom)) / 2);
+    const centerL = bottom.length ? bottom[0].x - gap : right;
+    const centerR = bottom.length ? bottom[bottom.length - 1].x + bottom[bottom.length - 1].w + gap : textLeft;
+    shrinkRow(under, centerL - textLeft);
+    placeRow(under, textLeft);
+    shrinkRow(underSerial, right - Math.max(centerR, under.length ? under[under.length - 1].x + under[under.length - 1].w + gap : textLeft));
+    placeRow(underSerial, right - rowWidth(underSerial));
 
-    // Both logos on top: place them side by side as a centered pair
-    if (logoRect && brandRect && logoPos === 'top' && brandPos === 'top') {
-      const gap = SPEC.logoBadgeGap;
-      const groupW = logoRect.w + gap + brandRect.w;
-      logoRect.x = (SPEC.width - groupW) / 2;
-      brandRect.x = logoRect.x + logoRect.w + gap;
-    }
     let areaTop = iy0;
-    if (logoRect && logoPos === 'top') areaTop = Math.max(areaTop, logoRect.y + logoRect.h);
-    if (brandRect && brandPos === 'top') areaTop = Math.max(areaTop, brandRect.y + brandRect.h);
-
-    let areaBottom = logoRect && logoPos === 'center' ? Math.min(iy1, logoRect.y) : iy1;
-    if (badgeRect) areaBottom = Math.min(areaBottom, badgeRect.y);
-    if (brandRect && (brandPos === 'bottom' || brandPos === 'under-text' || brandPos === 'under-serial')) areaBottom = Math.min(areaBottom, brandRect.y);
+    top.forEach((r) => { areaTop = Math.max(areaTop, r.y + r.h); });
+    let areaBottom = iy1;
+    [...bottom, ...under, ...underSerial].forEach((r) => { areaBottom = Math.min(areaBottom, r.y); });
 
     // The 3-line block is ~3x the font size tall; shrink if it can't fit above the logo
     const [b0, b1] = SPEC.baselines;
@@ -1259,6 +1276,8 @@ input[type="range"] { width: 100%; accent-color: var(--focus); }
     brandScale: 100,
     brandEffect: 'none',
     badge: 'none',
+    badgePos: 'bottom',
+    qrPos: 'left',
     badgeColor: 'gold',
     badgeScale: 100,
     fontScale: 75,
@@ -1300,6 +1319,8 @@ input[type="range"] { width: 100%; accent-color: var(--focus); }
       brandScale: Number(el.brandScale.value) / 100,
       brandEffect: el.brandEffect.value,
       badge: el.badge.value || 'none',
+      badgePos: el.badgePos.value || 'bottom',
+      qrPos: el.qrPos.value || 'left',
       badgeColor: el.badgeColor.value,
       badgeScale: Number(el.badgeScale.value) / 100,
       bgEffect: el.bgEffect.value,
@@ -1335,6 +1356,8 @@ input[type="range"] { width: 100%; accent-color: var(--focus); }
     el.brandEffect.value = s.brandEffect || 'none';
     if (s.brandPick !== undefined) el.brandPick.value = s.brandPick || '';
     el.badge.value = s.badge || 'none';
+    el.badgePos.value = s.badgePos || 'bottom';
+    el.qrPos.value = s.qrPos || 'left';
     el.badgeColor.value = s.badgeColor || 'gold';
     el.badgeScale.value = s.badgeScale ? (s.badgeScale <= 2 ? Math.round(s.badgeScale * 100) : s.badgeScale) : 100;
     syncFontSizeOut();
@@ -2038,9 +2061,9 @@ input[type="range"] { width: 100%; accent-color: var(--focus); }
     setSummary('team', logo.img ? `${stripLogo(logo.name)} · ${POS_LABEL[d.logoPos]}` : 'Off', !!logo.img);
     setSummary('set', brand.img ? `${stripLogo(brand.name)} · ${POS_LABEL[d.brandPos]}` : 'Off', !!brand.img);
     const badgeOn = d.badge === 'rookie' || d.badge === 'hof';
-    setSummary('badge', badgeOn ? `${d.badge === 'rookie' ? 'Rookie' : 'HOF'} · ${form.elements.badgeColor.selectedOptions[0].text}` : 'Off', badgeOn);
+    setSummary('badge', badgeOn ? `${d.badge === 'rookie' ? 'Rookie' : 'HOF'} · ${form.elements.badgeColor.selectedOptions[0].text} · ${POS_LABEL[d.badgePos] || 'Bottom'}` : 'Off', badgeOn);
     const url = (d.qrUrl || '').trim();
-    setSummary('qr', url ? url.replace(/^https?:\/\//, '') + (qrBack() ? ' · back only' : '') : 'Off', !!url);
+    setSummary('qr', url ? url.replace(/^https?:\/\//, '') + (qrBack() ? ' · back only' : d.qrPos === 'right' ? ' · Right' : '') : 'Off', !!url);
   }
 
   function saveOpen() {
