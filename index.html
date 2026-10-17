@@ -1701,11 +1701,39 @@ input[type="range"] { width: 100%; accent-color: var(--focus); }
   ];
   const stadiumPick = document.getElementById('stadium-pick');
   // Historic parks: former homes (or vintage photos of the same park), in backgrounds/stadiums/historic/
-  const HISTORIC_PARKS = [];
+  const HISTORIC_PARKS = [
+    { id: "hist-LAA", team: "LAA", park: "Anaheim Stadium", years: "1966\u20131997", file: "historic/LAA.jpg", focus: 0.5 },
+    { id: "hist-TEX", team: "TEX", park: "Arlington Stadium", years: "1972\u20131993", file: "historic/TEX.jpg", focus: 0.45 },
+    { id: "hist-HOU", team: "HOU", park: "Astrodome", years: "1965\u20131999", file: "historic/HOU.jpg", focus: 1.0 },
+    { id: "hist-ATL", team: "ATL", park: "Atlanta\u2013Fulton County Stadium", years: "1966\u20131996", file: "historic/ATL.jpg", focus: 0.55 },
+    { id: "hist-STL", team: "STL", park: "Busch Memorial Stadium", years: "1966\u20132005", file: "historic/STL.jpg", focus: 0.6 },
+    { id: "hist-SF", team: "SF", park: "Candlestick Park", years: "1960\u20131999", file: "historic/SF.jpg", focus: 0.45 },
+    { id: "hist-CLE", team: "CLE", park: "Cleveland Municipal Stadium", years: "1932\u20131993", file: "historic/CLE.jpg", focus: 0.7 },
+    { id: "hist-CWS", team: "CWS", park: "Comiskey Park", years: "1910\u20131990", file: "historic/CWS.jpg", focus: 0.45 },
+    { id: "hist-CIN", team: "CIN", park: "Crosley Field", years: "1912\u20131970", file: "historic/CIN.jpg", focus: 0.5 },
+    { id: "hist-LAD", team: "LAD", park: "Ebbets Field", years: "1913\u20131957", file: "historic/LAD.jpg", focus: 0.45 },
+    { id: "hist-TOR", team: "TOR", park: "Exhibition Stadium", years: "1977\u20131989", file: "historic/TOR.jpg", focus: 0.3 },
+    { id: "hist-BOS", team: "BOS", park: "Fenway Park", years: "1967", file: "historic/BOS.jpg", focus: 0.5 },
+    { id: "hist-PIT", team: "PIT", park: "Forbes Field", years: "1909\u20131970", file: "historic/PIT.jpg", focus: 0.4 },
+    { id: "hist-SD", team: "SD", park: "Jack Murphy Stadium", years: "1969\u20132003", file: "historic/SD.jpg", focus: 0.5 },
+    { id: "hist-MIA", team: "MIA", park: "Joe Robbie Stadium", years: "1993\u20132011", file: "historic/MIA.jpg", focus: 0.45 },
+    { id: "hist-KC", team: "KC", park: "Kansas City Municipal Stadium", years: "1955\u20131972", file: "historic/KC.jpg", focus: 0.5 },
+    { id: "hist-SEA", team: "SEA", park: "Kingdome", years: "1977\u20131999", file: "historic/SEA.jpg", focus: 0.45 },
+    { id: "hist-BAL", team: "BAL", park: "Memorial Stadium", years: "1954\u20131991", file: "historic/BAL.jpg", focus: 0.55 },
+    { id: "hist-MIN", team: "MIN", park: "Metropolitan Stadium", years: "1961\u20131981", file: "historic/MIN.jpg", focus: 0.5 },
+    { id: "hist-COL", team: "COL", park: "Mile High Stadium", years: "1993\u20131994", file: "historic/COL.jpg", focus: 0.55 },
+    { id: "hist-MIL", team: "MIL", park: "Milwaukee County Stadium", years: "1970\u20132000", file: "historic/MIL.jpg", focus: 0.5 },
+    { id: "hist-ATH", team: "ATH", park: "Oakland Coliseum", years: "1968\u20132024", file: "historic/ATH.jpg", focus: 0.55 },
+    { id: "hist-NYM", team: "NYM", park: "Shea Stadium", years: "1964\u20132008", file: "historic/NYM.jpg", focus: 0.5 },
+    { id: "hist-DET", team: "DET", park: "Tiger Stadium", years: "1912\u20131999", file: "historic/DET.jpg", focus: 0.5 },
+    { id: "hist-PHI", team: "PHI", park: "Veterans Stadium", years: "1971\u20132003", file: "historic/PHI.jpg", focus: 0.45 },
+    { id: "hist-CHC", team: "CHC", park: "Wrigley Field", years: "c. 1950", file: "historic/CHC.jpg", focus: 0.45 },
+    { id: "hist-NYY", team: "NYY", park: "Yankee Stadium (original)", years: "1923\u20132008", file: "historic/NYY.jpg", focus: 0.5 },
+  ];
   const stadiumId = (s) => s.id || s.team;
   function fillStadiums() {
     const groups = [['Current parks', STADIUMS, (s) => `${s.park} — ${MLB_TEAMS[s.team] || s.team}`],
-      ['Historic parks', HISTORIC_PARKS, (s) => `${s.park} — ${s.years}`]];
+      ['Historic parks', HISTORIC_PARKS, (s) => `${s.park} (${s.years}) — ${MLB_TEAMS[s.team] || s.team}`]];
     groups.forEach(([label, list, text]) => {
       if (!list.length) return;
       const g = document.createElement('optgroup');
