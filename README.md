@@ -27,7 +27,11 @@ It's a single static file with no build step. Open `index.html` in a browser, or
 python3 -m http.server 5173
 ```
 
-When printing, choose **100% / Actual size** so labels come out at exactly 2.5″ × 0.75″.
+## Printing tips
+
+- Choose **100% / Actual size** (not "Scale to fit") so labels come out at exactly 2.5″ × 0.75″.
+- Use a regular paper size, **not a borderless one**. Borderless printing enlarges the image by a few percent, so labels print slightly too wide.
+- To print a downloaded PNG, open it in **Preview**, not Photos; Preview uses the file's 600 DPI print size, Photos ignores it.
 
 ## Credits
 
