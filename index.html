@@ -589,6 +589,7 @@ input[type="range"] { width: 100%; accent-color: var(--focus); }
                 <label><input type="radio" name="badge" value="none" checked /><span>None</span></label>
                 <label><input type="radio" name="badge" value="rookie" /><span>Rookie (RC)</span></label>
                 <label><input type="radio" name="badge" value="hof" /><span>HOF</span></label>
+                <label><input type="radio" name="badge" value="both" /><span>Both</span></label>
               </div>
             </div>
             <div class="field">
@@ -1071,17 +1072,18 @@ input[type="range"] { width: 100%; accent-color: var(--focus); }
         }
       }
     }
-    // Rookie / HOF badge: on the top or bottom border (x is set when the slots are laid out)
-    let badgeRect = null;
+    // Rookie / HOF badges ("both" shows RC then HOF): on the top or bottom border
+    // (x is set when the slots are laid out)
     const badgePos = ['top', 'under-text', 'under-serial'].includes(data.badgePos) ? data.badgePos : 'bottom';
-    if (data.badge === 'rookie' || data.badge === 'hof') {
+    const badgeTypes = data.badge === 'both' ? ['rookie', 'hof'] : data.badge === 'rookie' || data.badge === 'hof' ? [data.badge] : [];
+    const badgeRects = badgeTypes.map((type) => {
       const bh = SPEC.badgeHeight * (data.badgeScale || 1);
-      const bw = data.badge === 'rookie' ? bh * 0.95 : bh * 2.2;
+      const bw = type === 'rookie' ? bh * 0.95 : bh * 2.2;
       const cy = badgePos === 'top'
         ? Math.max(iy0, SPEC.edgePad + bh / 2)
         : Math.min(iy1, SPEC.height - SPEC.edgePad - bh / 2);
-      badgeRect = { x: (SPEC.width - bw) / 2, y: cy - bh / 2, w: bw, h: bh };
-    }
+      return { type, x: (SPEC.width - bw) / 2, y: cy - bh / 2, w: bw, h: bh };
+    });
 
     // Manufacturer set logo. Left: its own column (after a left QR code / team logo).
     // Under text / under serial #: on the bottom border, kept clear of centered items.
@@ -1133,7 +1135,7 @@ input[type="range"] { width: 100%; accent-color: var(--focus); }
     //   top / bottom: centered rows; under-text: from the text's left edge; under-serial: ending at the numbers' right edge
     const inSlot = (slot) => [
       logoRect && ((slot === 'top' && logoPos === 'top') || (slot === 'bottom' && logoPos === 'center')) && logoRect,
-      badgeRect && badgePos === slot && badgeRect,
+      ...(badgePos === slot ? badgeRects : []),
       brandRect && brandPos === slot && brandRect,
     ].filter(Boolean);
     const gap = SPEC.logoBadgeGap;
@@ -1240,7 +1242,7 @@ input[type="range"] { width: 100%; accent-color: var(--focus); }
       drawSmooth(ctx, brandImg, brandRect.x * k, brandRect.y * k, brandRect.w * k, brandRect.h * k);
     }
 
-    if (badgeRect) drawBadge(ctx, data.badge, badgeRect, data.badgeColor, data.borderColor, k);
+    badgeRects.forEach((r) => drawBadge(ctx, r.type, r, data.badgeColor, data.borderColor, k));
 
     return { qrTooLong: !!qrUrl && !qr };
   }
@@ -1730,7 +1732,6 @@ input[type="range"] { width: 100%; accent-color: var(--focus); }
     { id: "hist-HOU", team: "HOU", park: "Astrodome", years: "1965\u20131999", file: "historic/HOU.jpg", focus: 1.0 },
     { id: "hist-ATL", team: "ATL", park: "Atlanta\u2013Fulton County Stadium", years: "1966\u20131996", file: "historic/ATL.jpg", focus: 0.55 },
     { id: "hist-STL", team: "STL", park: "Busch Memorial Stadium", years: "1966\u20132005", file: "historic/STL.jpg", focus: 0.6 },
-    { id: "hist-SF", team: "SF", park: "Candlestick Park", years: "1960\u20131999", file: "historic/SF.jpg", focus: 0.45 },
     { id: "hist-CLE", team: "CLE", park: "Cleveland Municipal Stadium", years: "1932\u20131993", file: "historic/CLE.jpg", focus: 0.7 },
     { id: "hist-CWS", team: "CWS", park: "Comiskey Park", years: "1910\u20131990", file: "historic/CWS.jpg", focus: 0.45 },
     { id: "hist-CIN", team: "CIN", park: "Crosley Field", years: "1912\u20131970", file: "historic/CIN.jpg", focus: 0.5 },
@@ -1741,6 +1742,7 @@ input[type="range"] { width: 100%; accent-color: var(--focus); }
     { id: "hist-SD", team: "SD", park: "Jack Murphy Stadium", years: "1969\u20132003", file: "historic/SD.jpg", focus: 0.5 },
     { id: "hist-MIA", team: "MIA", park: "Joe Robbie Stadium", years: "1993\u20132011", file: "historic/MIA.jpg", focus: 0.45 },
     { id: "hist-KC", team: "KC", park: "Kansas City Municipal Stadium", years: "1955\u20131972", file: "historic/KC.jpg", focus: 0.5 },
+    { id: "hist-SF", team: "SF", park: "Polo Grounds", years: "1910", file: "historic/SF.jpg", focus: 0.5 },
     { id: "hist-SEA", team: "SEA", park: "Kingdome", years: "1977\u20131999", file: "historic/SEA.jpg", focus: 0.45 },
     { id: "hist-BAL", team: "BAL", park: "Memorial Stadium", years: "1954\u20131991", file: "historic/BAL.jpg", focus: 0.55 },
     { id: "hist-MIN", team: "MIN", park: "Metropolitan Stadium", years: "1961\u20131981", file: "historic/MIN.jpg", focus: 0.5 },
@@ -2060,8 +2062,8 @@ input[type="range"] { width: 100%; accent-color: var(--focus); }
     setSummary('bg', bg.img ? `${bg.name} · ${Math.round(d.bgOpacity * 100)}%` : 'Off', !!bg.img);
     setSummary('team', logo.img ? `${stripLogo(logo.name)} · ${POS_LABEL[d.logoPos]}` : 'Off', !!logo.img);
     setSummary('set', brand.img ? `${stripLogo(brand.name)} · ${POS_LABEL[d.brandPos]}` : 'Off', !!brand.img);
-    const badgeOn = d.badge === 'rookie' || d.badge === 'hof';
-    setSummary('badge', badgeOn ? `${d.badge === 'rookie' ? 'Rookie' : 'HOF'} · ${form.elements.badgeColor.selectedOptions[0].text} · ${POS_LABEL[d.badgePos] || 'Bottom'}` : 'Off', badgeOn);
+    const badgeOn = ['rookie', 'hof', 'both'].includes(d.badge);
+    setSummary('badge', badgeOn ? `${{ rookie: 'Rookie', hof: 'HOF', both: 'Rookie + HOF' }[d.badge]} · ${form.elements.badgeColor.selectedOptions[0].text} · ${POS_LABEL[d.badgePos] || 'Bottom'}` : 'Off', badgeOn);
     const url = (d.qrUrl || '').trim();
     setSummary('qr', url ? url.replace(/^https?:\/\//, '') + (qrBack() ? ' · back only' : d.qrPos === 'right' ? ' · Right' : '') : 'Off', !!url);
   }
