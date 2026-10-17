@@ -10,7 +10,7 @@ Custom 2.5″ × 0.75″ slab labels for Zion SlabMag cases, made in the browser
 - Text size, Normal/Bold weight, text color, ALL CAPS
 - Border color (picker, hex, presets) and thickness
 - QR code from any URL
-- MLB team logo picklist for all 30 teams, in Primary, Cap or Wordmark style (plus extras like the Red Sox circle), or your own logo upload
+- MLB team logo picklist for all 30 teams, in Primary, Cap or Wordmark style, plus Vintage logos for 19 teams (e.g. Brooklyn Dodgers, Seattle Pilots, Montreal Expos) and extras like the Red Sox circle, or your own logo upload
 - Logos on white backgrounds are cut out automatically, and all logos are scaled smoothly for clean edges
 - Logo position (left, top, bottom or right), auto-trimming, size and image effects
 - Manufacturer set logo picklist (28 Topps, Bowman, Panini, Upper Deck and Leaf sets) or upload, placed left, top, under the text or under the serial #

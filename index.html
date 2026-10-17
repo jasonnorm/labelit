@@ -1853,8 +1853,27 @@ input[type="range"] { width: 100%; accent-color: var(--focus); }
   };
   const TEAM_STYLES = [['primary', 'Primary'], ['cap', 'Cap'], ['wordmark', 'Wordmark']];
   // Extra alternates for specific teams (raster files in logos/mlb/extra/)
+  // Vintage logos are from Wikimedia Commons (see CREDITS.md); some are from a franchise's earlier city or name
   const TEAM_EXTRAS = {
-    BOS: [{ id: 'circle', name: 'Circle', file: 'extra/BOS-circle.png' }],
+    ATH: [{ id: 'vintage', name: "Vintage (Philadelphia A\u2019s, 1902\u201321)", file: 'vintage/ATH.svg' }],
+    ATL: [{ id: 'vintage', name: "Vintage (Milwaukee Braves, 1953\u201365)", file: 'vintage/ATL.svg' }],
+    BAL: [{ id: 'vintage', name: "Vintage (1988\u201394)", file: 'vintage/BAL.png' }],
+    BOS: [{ id: 'vintage', name: "Vintage (1908)", file: 'vintage/BOS.svg' }, { id: 'circle', name: 'Circle', file: 'extra/BOS-circle.png' }],
+    CHC: [{ id: 'vintage', name: "Vintage (1914)", file: 'vintage/CHC.png' }],
+    CWS: [{ id: 'vintage', name: "Vintage (1991 alternate)", file: 'vintage/CWS.svg' }],
+    DET: [{ id: 'vintage', name: "Vintage (1957\u201360)", file: 'vintage/DET.png' }],
+    LAA: [{ id: 'vintage', name: "Vintage (California Angels, 1966\u201370)", file: 'vintage/LAA.svg' }],
+    LAD: [{ id: 'vintage', name: "Vintage (Brooklyn Dodgers, 1949\u201357)", file: 'vintage/LAD.svg' }],
+    MIL: [{ id: 'vintage', name: "Vintage (Seattle Pilots, 1969)", file: 'vintage/MIL.svg' }],
+    MIN: [{ id: 'vintage', name: "Vintage (Washington Senators, 1948\u201352)", file: 'vintage/MIN.svg' }],
+    NYY: [{ id: 'vintage', name: "Vintage (NY Highlanders, 1904)", file: 'vintage/NYY.png' }],
+    PIT: [{ id: 'vintage', name: "Vintage (1922)", file: 'vintage/PIT.png' }],
+    SD: [{ id: 'vintage', name: "Vintage (1985)", file: 'vintage/SD.png' }],
+    SF: [{ id: 'vintage', name: "Vintage (New York Giants, 1947\u201357)", file: 'vintage/SF.png' }],
+    SEA: [{ id: 'vintage', name: "Vintage (1980\u201386)", file: 'vintage/SEA.png' }],
+    STL: [{ id: 'vintage', name: "Vintage (1900\u201319)", file: 'vintage/STL.png' }],
+    TEX: [{ id: 'vintage', name: "Vintage (1994\u20132002)", file: 'vintage/TEX.png' }],
+    WSH: [{ id: 'vintage', name: "Vintage (Montreal Expos, 1992\u20132004)", file: 'vintage/WSH.svg' }],
   };
   const mlbSelect = document.getElementById('mlb-team');
   const styleSelect = document.getElementById('team-style');
