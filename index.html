@@ -236,6 +236,34 @@ input[type="range"] { width: 100%; accent-color: var(--focus); }
 .section-body .field { margin-bottom: 12px; }
 .section-body .logo-row { margin-bottom: 12px; }
 .caps-check { align-self: end; padding-bottom: 8px; }
+/* Clickable mini-label for choosing a logo position */
+.pos-current { color: var(--muted); font-weight: 400; margin-left: 6px; }
+.pos-map {
+  position: relative; width: 100%; max-width: 320px; aspect-ratio: 10 / 3; margin: 10px 0 6px;
+  border-radius: 6px; background: var(--muted); padding: 7%; box-sizing: border-box;
+  --line: color-mix(in srgb, var(--ink) 30%, transparent);
+}
+.pos-art { position: absolute; inset: 9% 3%; background: var(--panel); border-radius: 4px; }
+.pos-art i { position: absolute; height: 9%; border-radius: 2px; background: var(--line); }
+.pos-art .l1 { left: 22%; top: 24%; width: 42%; }
+.pos-art .l2 { left: 22%; top: 45%; width: 32%; }
+.pos-art .l3 { left: 22%; top: 66%; width: 38%; }
+.pos-art .n1 { right: 6%; top: 24%; width: 12%; }
+.pos-art .n3 { right: 6%; top: 66%; width: 12%; }
+.spot {
+  position: absolute; left: var(--x); top: var(--y); transform: translate(-50%, -50%);
+  width: 30px; height: 20px; cursor: pointer; z-index: 1;
+}
+.spot input { position: absolute; inset: 0; opacity: 0; margin: 0; cursor: pointer; }
+.spot span {
+  display: block; width: 100%; height: 100%; border-radius: 5px; box-sizing: border-box;
+  border: 2px dashed var(--focus); background: color-mix(in srgb, var(--panel) 85%, transparent);
+  transition: background .12s ease;
+}
+.spot:hover span { background: color-mix(in srgb, var(--focus) 30%, var(--panel)); }
+.spot input:checked + span { background: var(--focus); border-style: solid; }
+.spot input:focus-visible + span { outline: 2px solid var(--ink); outline-offset: 2px; }
+
 .match-team { display: grid; gap: 8px; margin-bottom: 12px; justify-items: start; }
 .match-team .hint { margin: 0; }
 .match-team.disabled .segmented { opacity: 0.45; pointer-events: none; }
@@ -468,12 +496,13 @@ input[type="range"] { width: 100%; accent-color: var(--focus); }
               <span class="logo-name" id="logo-name">No image</span>
             </div>
             <div class="field">
-              <span>Position</span>
-              <div class="segmented" role="radiogroup" aria-label="Upload image position">
-                  <label><input type="radio" name="logoPos" value="left" /><span>Left</span></label>
-                  <label><input type="radio" name="logoPos" value="top" /><span>Top</span></label>
-                  <label><input type="radio" name="logoPos" value="center" checked /><span>Bottom</span></label>
-                  <label><input type="radio" name="logoPos" value="right" /><span>Right</span></label>
+              <span>Position <output class="pos-current" data-for="logoPos"></output></span>
+              <div class="pos-map" role="radiogroup" aria-label="Team logo position">
+                <div class="pos-art" aria-hidden="true"><i class="l1"></i><i class="l2"></i><i class="l3"></i><i class="n1"></i><i class="n3"></i></div>
+                <label class="spot" style="--x:9%;--y:50%" title="Left"><input type="radio" name="logoPos" value="left" aria-label="Left" /><span></span></label>
+                <label class="spot" style="--x:50%;--y:6%" title="Top"><input type="radio" name="logoPos" value="top" aria-label="Top" /><span></span></label>
+                <label class="spot" style="--x:50%;--y:94%" title="Bottom"><input type="radio" name="logoPos" value="center" aria-label="Bottom" checked /><span></span></label>
+                <label class="spot" style="--x:91%;--y:50%" title="Right"><input type="radio" name="logoPos" value="right" aria-label="Right" /><span></span></label>
               </div>
             </div>
             <div class="row-2">
@@ -496,7 +525,7 @@ input[type="range"] { width: 100%; accent-color: var(--focus); }
                 </select>
               </label>
             </div>
-            <p class="hint">Blank margins are trimmed automatically. Top and bottom sit centered on the border; left and right get their own column.</p>
+            <p class="hint">Click a spot on the label to place the logo. Blank margins and white backgrounds are trimmed automatically.</p>
           </div>
         </details>
         <details class="section" id="sec-set" data-section="set">
@@ -517,13 +546,15 @@ input[type="range"] { width: 100%; accent-color: var(--focus); }
               <span class="logo-name" id="brand-name">No image</span>
             </div>
             <div class="field">
-              <span>Position</span>
-              <div class="segmented" role="radiogroup" aria-label="Upload set logo position">
-                  <label><input type="radio" name="brandPos" value="left" /><span>Left</span></label>
-                  <label><input type="radio" name="brandPos" value="top" /><span>Top</span></label>
-                  <label><input type="radio" name="brandPos" value="bottom" /><span>Bottom</span></label>
-                  <label><input type="radio" name="brandPos" value="under-text" checked /><span>Under text</span></label>
-                  <label><input type="radio" name="brandPos" value="under-serial" /><span>Under serial #</span></label>
+              <span>Position <output class="pos-current" data-for="brandPos"></output></span>
+              <div class="pos-map" role="radiogroup" aria-label="Set logo position">
+                <div class="pos-art" aria-hidden="true"><i class="l1"></i><i class="l2"></i><i class="l3"></i><i class="n1"></i><i class="n3"></i></div>
+                <label class="spot" style="--x:9%;--y:38%" title="Left"><input type="radio" name="brandPos" value="left" aria-label="Left" /><span></span></label>
+                <label class="spot" style="--x:9%;--y:80%" title="Under team logo"><input type="radio" name="brandPos" value="under-logo" aria-label="Under team logo" /><span></span></label>
+                <label class="spot" style="--x:50%;--y:6%" title="Top"><input type="radio" name="brandPos" value="top" aria-label="Top" /><span></span></label>
+                <label class="spot" style="--x:50%;--y:94%" title="Bottom"><input type="radio" name="brandPos" value="bottom" aria-label="Bottom" /><span></span></label>
+                <label class="spot" style="--x:28%;--y:94%" title="Under text"><input type="radio" name="brandPos" value="under-text" aria-label="Under text" checked /><span></span></label>
+                <label class="spot" style="--x:86%;--y:94%" title="Under serial #"><input type="radio" name="brandPos" value="under-serial" aria-label="Under serial #" /><span></span></label>
               </div>
             </div>
             <div class="row-2">
@@ -546,7 +577,7 @@ input[type="range"] { width: 100%; accent-color: var(--focus); }
                 </select>
               </label>
             </div>
-            <p class="hint">Top and bottom sit centered on the border (sharing the bottom with a badge or team logo); under text and under serial # sit on the bottom border at the sides; left gets its own column.</p>
+            <p class="hint">Click a spot on the label. "Under team logo" stacks it below a left-side team logo (otherwise it uses the left column). Items on the bottom center share one row.</p>
           </div>
         </details>
         <details class="section" id="sec-badge" data-section="badge">
@@ -1036,7 +1067,10 @@ input[type="range"] { width: 100%; accent-color: var(--focus); }
     // Manufacturer set logo. Left: its own column (after a left QR code / team logo).
     // Under text / under serial #: on the bottom border, kept clear of centered items.
     let brandRect = null;
-    const brandPos = data.brandPos || 'under-text';
+    let brandPos = data.brandPos || 'under-text';
+    const teamOnLeft = !!(logoRect && logoPos === 'left');
+    if (brandPos === 'under-logo' && !teamOnLeft) brandPos = 'left'; // nothing to stack under
+    let stacked = false;
     if (data.brand && data.brand.naturalWidth) {
       const s = data.brandScale || 1;
       const ratio = data.brand.naturalWidth / data.brand.naturalHeight;
@@ -1054,6 +1088,14 @@ input[type="range"] { width: 100%; accent-color: var(--focus); }
         const { w, h: bh } = contain(SPEC.brandBox.width * s, boxH);
         const boxBottom = Math.min(SPEC.height - SPEC.edgePad, iy1 + (SPEC.logoBox.top + SPEC.logoBox.height - (SPEC.height - SPEC.border)));
         brandRect = { x: (SPEC.width - w) / 2, y: boxBottom - boxH / 2 - bh / 2, w, h: bh };
+      } else if (brandPos === 'under-logo') {
+        // Stack under the team logo in the same left column; both centered in the column
+        const { w, h: bh } = contain(SPEC.logoSide.width * s, SPEC.brandBox.height * s);
+        const x0 = logoRect.x, colW = Math.max(logoRect.w, w);
+        logoRect.x = x0 + (colW - logoRect.w) / 2;
+        brandRect = { x: x0 + (colW - w) / 2, y: 0, w, h: bh };
+        textLeft = x0 + colW + SPEC.qrGap;
+        stacked = true;
       } else if (brandPos === 'left') {
         const maxH = (iy1 - iy0) - SPEC.qrInset * 2;
         const { w, h: bh } = contain(SPEC.logoSide.width * s, Math.min(maxH, SPEC.logoSide.height * s));
@@ -1130,8 +1172,25 @@ input[type="range"] { width: 100%; accent-color: var(--focus); }
       }
       r.y = Math.min(iy1 - pad - r.h, Math.max(iy0 + pad, textMid - r.h / 2));
     };
-    if (logoRect && (logoPos === 'left' || logoPos === 'right')) alignToText(logoRect);
-    if (brandRect && brandPos === 'left') alignToText(brandRect);
+    if (stacked) {
+      // Team logo over set logo, centered as one block on the text; shrink both if needed
+      const pad = SPEC.qrInset / 2, gap = 0.02;
+      const cx = logoRect.x + logoRect.w / 2;
+      const maxH = 2 * Math.min(textMid - (iy0 + pad), (iy1 - pad) - textMid);
+      const total = logoRect.h + gap + brandRect.h;
+      if (total > maxH && maxH > 0.1) {
+        const f = (maxH - gap) / (logoRect.h + brandRect.h);
+        [logoRect, brandRect].forEach((r) => { r.w *= f; r.h *= f; });
+      }
+      logoRect.x = cx - logoRect.w / 2;
+      brandRect.x = cx - brandRect.w / 2;
+      const top = Math.min(iy1 - pad - (logoRect.h + gap + brandRect.h), Math.max(iy0 + pad, textMid - (logoRect.h + gap + brandRect.h) / 2));
+      logoRect.y = top;
+      brandRect.y = top + logoRect.h + gap;
+    } else {
+      if (logoRect && (logoPos === 'left' || logoPos === 'right')) alignToText(logoRect);
+      if (brandRect && brandPos === 'left') alignToText(brandRect);
+    }
 
     ctx.fillStyle = data.textColor || SPEC.textColor;
     ctx.textBaseline = 'alphabetic';
@@ -1317,6 +1376,7 @@ input[type="range"] { width: 100%; accent-color: var(--focus); }
   }
 
   function syncFontSizeOut() {
+    if (typeof syncPosLabels === 'function') syncPosLabels();
     document.getElementById('font-size-out').textContent = form.elements.fontScale.value + '%';
     document.getElementById('logo-size-out').textContent = form.elements.logoScale.value + '%';
     document.getElementById('bg-opacity-out').textContent = form.elements.bgOpacity.value + '%';
@@ -1326,6 +1386,15 @@ input[type="range"] { width: 100%; accent-color: var(--focus); }
     document.getElementById('brand-size-out').textContent = form.elements.brandScale.value + '%';
     document.getElementById('border-out').textContent = (form.elements.border.value / 1000).toFixed(3) + '″';
   }
+  // Show the name of the chosen spot next to "Position"
+  function syncPosLabels() {
+    document.querySelectorAll('.pos-current').forEach((out) => {
+      const checked = form.querySelector(`input[name="${out.dataset.for}"]:checked`);
+      out.textContent = checked ? `· ${checked.getAttribute('aria-label')}` : '';
+    });
+  }
+  form.addEventListener('change', (e) => { if (e.target.closest('.pos-map')) syncPosLabels(); });
+
   ['fontScale', 'logoScale', 'bgOpacity', 'border', 'badgeScale', 'brandScale', 'bgFocus'].forEach((n) => form.elements[n].addEventListener('input', syncFontSizeOut));
 
   // ---------- color ----------
@@ -1631,17 +1700,28 @@ input[type="range"] { width: 100%; accent-color: var(--focus); }
     { team: "NYY", park: "Yankee Stadium", file: "NYY.jpg", focus: 0.6 },
   ];
   const stadiumPick = document.getElementById('stadium-pick');
+  // Historic parks: former homes (or vintage photos of the same park), in backgrounds/stadiums/historic/
+  const HISTORIC_PARKS = [];
+  const stadiumId = (s) => s.id || s.team;
   function fillStadiums() {
-    STADIUMS.forEach((s) => stadiumPick.add(new Option(`${s.park} — ${MLB_TEAMS[s.team] || s.team}`, s.team)));
+    const groups = [['Current parks', STADIUMS, (s) => `${s.park} — ${MLB_TEAMS[s.team] || s.team}`],
+      ['Historic parks', HISTORIC_PARKS, (s) => `${s.park} — ${s.years}`]];
+    groups.forEach(([label, list, text]) => {
+      if (!list.length) return;
+      const g = document.createElement('optgroup');
+      g.label = label;
+      list.forEach((s) => g.appendChild(new Option(text(s), stadiumId(s))));
+      stadiumPick.appendChild(g);
+    });
   }
   stadiumPick.addEventListener('change', async () => {
-    const s = STADIUMS.find((x) => x.team === stadiumPick.value);
+    const s = [...STADIUMS, ...HISTORIC_PARKS].find((x) => stadiumId(x) === stadiumPick.value);
     if (!s) { bg.set(null); return; }
     const nameEl = document.getElementById('bg-name');
     nameEl.textContent = 'Loading…';
     try {
       const img = await loadImage(`backgrounds/stadiums/${s.file}`);
-      if (stadiumPick.value !== s.team) return;
+      if (stadiumPick.value !== stadiumId(s)) return;
       form.elements.bgFocus.value = Math.round((s.focus == null ? 0.5 : s.focus) * 100);
       syncFontSizeOut();
       bg.set(prepareBackground(img), s.park);
@@ -1784,7 +1864,13 @@ input[type="range"] { width: 100%; accent-color: var(--focus); }
     try {
       let img;
       if (extra) {
-        img = await loadImage(`logos/mlb/${extra.file}`);
+        if (/\.svg$/i.test(extra.file)) {
+          const res = await fetch(`logos/mlb/${extra.file}`);
+          if (!res.ok) throw new Error(res.status);
+          img = await loadImage(svgDataUrl(await res.text(), 1200));
+        } else {
+          img = await loadImage(`logos/mlb/${extra.file}`);
+        }
       } else {
         const res = await fetch(`logos/mlb/${style}/${abbr}.svg`);
         if (!res.ok) throw new Error(res.status);
@@ -1884,7 +1970,7 @@ input[type="range"] { width: 100%; accent-color: var(--focus); }
   // ---------- section summaries & open state ----------
   const SECTIONS_KEY = 'labelit:open';
   const sections = [...document.querySelectorAll('details.section')];
-  const POS_LABEL = { left: 'Left', top: 'Top', center: 'Bottom', bottom: 'Bottom', right: 'Right', 'under-text': 'Under text', 'under-serial': 'Under serial #' };
+  const POS_LABEL = { left: 'Left', top: 'Top', center: 'Bottom', bottom: 'Bottom', right: 'Right', 'under-logo': 'Under team logo', 'under-text': 'Under text', 'under-serial': 'Under serial #' };
   const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
   const stripLogo = (n) => (n || '').replace(/ logo$/, '');
 
@@ -1896,6 +1982,7 @@ input[type="range"] { width: 100%; accent-color: var(--focus); }
   }
 
   function updateSummaries(d) {
+    document.querySelectorAll('.pos-map').forEach((m) => { m.style.background = d.borderColor; });
     const card = [d.player, d.cardNo, d.serial].map((s) => (s || '').trim()).filter(Boolean).join(' · ');
     setSummary('card', card || 'Empty', !!card);
     setSummary('text', `${Math.round(d.fontScale * 100)}% · ${d.fontWeight === 700 ? 'Bold' : 'Normal'}${d.allCaps ? ' · CAPS' : ''}`, false, d.textColor);
