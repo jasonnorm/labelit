@@ -484,10 +484,20 @@ input[type="range"] { width: 100%; accent-color: var(--focus); }
               </label>
             </div>
             <label class="field size-field">
-              <span>Vertical position <output id="bg-focus-out">Middle</output></span>
-              <input name="bgFocus" type="range" min="0" max="100" step="5" value="50" aria-label="Background vertical position" />
+              <span>Zoom <output id="bg-zoom-out">100%</output></span>
+              <input name="bgZoom" type="range" min="100" max="300" step="10" value="100" aria-label="Background zoom" />
             </label>
-            <p class="hint">The image keeps its full width and is trimmed top and bottom to fit; slide to choose which band shows. Lower opacity keeps the text readable.</p>
+            <div class="row-2">
+              <label class="field size-field">
+                <span>Horizontal <output id="bg-focusx-out">Center</output></span>
+                <input name="bgFocusX" type="range" min="0" max="100" step="2" value="50" aria-label="Background horizontal position" />
+              </label>
+              <label class="field size-field">
+                <span>Vertical <output id="bg-focus-out">Middle</output></span>
+                <input name="bgFocus" type="range" min="0" max="100" step="2" value="50" aria-label="Background vertical position" />
+              </label>
+            </div>
+            <p class="hint">At 100% zoom the photo fills the full width, so Horizontal only moves extra-wide photos; zoom in to slide it left or right. Lower opacity keeps the text readable.</p>
           </div>
         </details>
 
@@ -1005,10 +1015,13 @@ input[type="range"] { width: 100%; accent-color: var(--focus); }
     if (data.bg && data.bg.naturalWidth) {
       const bgImg = applyEffect(data.bg, data.bgEffect, data.borderColor);
       const pw = (ix1 - ix0) * k, ph = (iy1 - iy0) * k;
-      const scale = Math.max(pw / data.bg.naturalWidth, ph / data.bg.naturalHeight);
+      // Cover-fit, then optional zoom; bgFocusX / bgFocus pick which part shows (0 = left/top, 1 = right/bottom)
+      const zoom = Math.max(1, Number(data.bgZoom) || 1);
+      const scale = Math.max(pw / data.bg.naturalWidth, ph / data.bg.naturalHeight) * zoom;
       const sw = pw / scale, sh = ph / scale;
-      const focus = data.bgFocus == null ? 0.5 : Math.max(0, Math.min(1, data.bgFocus));
-      const sx = (data.bg.naturalWidth - sw) / 2, sy = (data.bg.naturalHeight - sh) * focus;
+      const clamp01 = (v, d) => (v == null || Number.isNaN(Number(v)) ? d : Math.max(0, Math.min(1, Number(v))));
+      const sx = (data.bg.naturalWidth - sw) * clamp01(data.bgFocusX, 0.5);
+      const sy = (data.bg.naturalHeight - sh) * clamp01(data.bgFocus, 0.5);
       ctx.save();
       ctx.clip();
       ctx.globalAlpha = Math.max(0, Math.min(1, data.bgOpacity == null ? 0.35 : data.bgOpacity));
@@ -1313,6 +1326,8 @@ input[type="range"] { width: 100%; accent-color: var(--focus); }
     logoPos: 'center',
     bgOpacity: 35,
     bgFocus: 50,
+    bgFocusX: 50,
+    bgZoom: 100,
     stadium: '',
     border: 80,
   };
@@ -1362,6 +1377,8 @@ input[type="range"] { width: 100%; accent-color: var(--focus); }
       logoPos: el.logoPos.value || 'center',
       bgOpacity: Number(el.bgOpacity.value) / 100,
       bgFocus: Number(el.bgFocus.value) / 100,
+      bgFocusX: Number(el.bgFocusX.value) / 100,
+      bgZoom: Number(el.bgZoom.value) / 100,
       stadium: el.stadium.value,
       border: Number(el.border.value) / 1000,
     };
@@ -1381,6 +1398,8 @@ input[type="range"] { width: 100%; accent-color: var(--focus); }
     el.logoPos.value = s.logoPos || 'center';
     el.bgOpacity.value = s.bgOpacity != null ? (s.bgOpacity <= 1 ? s.bgOpacity * 100 : s.bgOpacity) : 35;
     el.bgFocus.value = s.bgFocus != null ? Math.round(s.bgFocus <= 1 ? s.bgFocus * 100 : s.bgFocus) : 50;
+    el.bgFocusX.value = s.bgFocusX != null ? Math.round(s.bgFocusX * 100) : 50;
+    el.bgZoom.value = s.bgZoom ? Math.round(s.bgZoom * 100) : 100;
     if (s.stadium !== undefined) el.stadium.value = venues().some((v) => stadiumId(v) === s.stadium) ? s.stadium : '';
     el.border.value = s.border ? (s.border < 1 ? Math.round(s.border * 1000) : s.border) : 80;
     syncFontSizeOut();
@@ -1469,6 +1488,9 @@ input[type="range"] { width: 100%; accent-color: var(--focus); }
     document.getElementById('bg-opacity-out').textContent = form.elements.bgOpacity.value + '%';
     const f = Number(form.elements.bgFocus.value);
     document.getElementById('bg-focus-out').textContent = f <= 10 ? 'Top' : f >= 90 ? 'Bottom' : f === 50 ? 'Middle' : `${f}%`;
+    const fx = Number(form.elements.bgFocusX.value);
+    document.getElementById('bg-focusx-out').textContent = fx <= 10 ? 'Left' : fx >= 90 ? 'Right' : fx === 50 ? 'Center' : `${fx}%`;
+    document.getElementById('bg-zoom-out').textContent = form.elements.bgZoom.value + '%';
     document.getElementById('badge-size-out').textContent = form.elements.badgeScale.value + '%';
     document.getElementById('brand-size-out').textContent = form.elements.brandScale.value + '%';
     document.getElementById('border-out').textContent = (form.elements.border.value / 1000).toFixed(3) + '″';
@@ -1482,7 +1504,7 @@ input[type="range"] { width: 100%; accent-color: var(--focus); }
   }
   form.addEventListener('change', (e) => { if (e.target.closest('.pos-map')) syncPosLabels(); });
 
-  ['fontScale', 'logoScale', 'bgOpacity', 'border', 'badgeScale', 'brandScale', 'bgFocus'].forEach((n) => form.elements[n].addEventListener('input', syncFontSizeOut));
+  ['fontScale', 'logoScale', 'bgOpacity', 'border', 'badgeScale', 'brandScale', 'bgFocus', 'bgFocusX', 'bgZoom'].forEach((n) => form.elements[n].addEventListener('input', syncFontSizeOut));
 
   // ---------- color ----------
   function normalizeHex(v) {
@@ -1877,6 +1899,8 @@ input[type="range"] { width: 100%; accent-color: var(--focus); }
       if (stadiumPick.value !== stadiumId(s)) return true;
       if (resetBand) {
         form.elements.bgFocus.value = Math.round((s.focus == null ? 0.5 : s.focus) * 100);
+        form.elements.bgFocusX.value = 50;
+        form.elements.bgZoom.value = 100;
         syncFontSizeOut();
       }
       bg.set(prepareBackground(img), s.park);
