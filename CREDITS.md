@@ -123,7 +123,7 @@ Arena backgrounds in `backgrounds/arenas/` (current) and `backgrounds/arenas/his
 
 Vintage team logos in `logos/mlb/vintage/` come from Wikimedia Commons, where they are marked public domain (mostly PD-textlogo / expired copyright); four cap logos had their square cap background removed. Like all team logos, they remain trademarks.
 
-NFL team logos (`logos/nfl/`) are trademarks of their respective teams and the NFL, from nfl.com.
+NFL team logos (`logos/nfl/`) are trademarks of their respective teams and the NFL, from nfl.com. Vintage NFL logos and wordmarks in `logos/nfl/vintage/` come from Wikimedia Commons, where they are marked public domain.
 
 NBA team logos (`logos/nba/`) are trademarks of their respective teams and the NBA, from cdn.nba.com. Vintage NBA logos in `logos/nba/vintage/` come from Wikimedia Commons, where they are marked public domain (PD-textlogo).
 

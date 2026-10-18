@@ -2094,7 +2094,28 @@ input[type="range"] { width: 100%; accent-color: var(--focus); }
     SEA: 'Seattle Seahawks', TB: 'Tampa Bay Buccaneers', TEN: 'Tennessee Titans', WAS: 'Washington Commanders',
   };
   const NFL_STYLES = [['primary', 'Primary']];
-  const NFL_EXTRAS = {};
+  // Vintage NFL logos from Wikimedia Commons (public domain; see CREDITS.md)
+  const NFL_EXTRAS = {
+    ARI: [{ id: 'vintage', name: "Vintage (Chicago Cardinals, 1920s)", file: 'vintage/ARI.png' }],
+    ATL: [{ id: 'vintage', name: "Vintage (1990s wordmark)", file: 'vintage/ATL.png' }],
+    BUF: [{ id: 'vintage', name: "Vintage (1962\u201373 standing buffalo)", file: 'vintage/BUF.svg' }],
+    CAR: [{ id: 'vintage', name: "Vintage (1995 wordmark)", file: 'vintage/CAR.png' }],
+    CLE: [{ id: 'vintage', name: "Vintage (1965 CB)", file: 'vintage/CLE.png' }],
+    DEN: [{ id: 'vintage', name: "Vintage (1968\u201396 wordmark)", file: 'vintage/DEN.png' }],
+    DET: [{ id: 'vintage', name: "Vintage (classic wordmark)", file: 'vintage/DET.png' }],
+    IND: [{ id: 'vintage', name: "Vintage (Baltimore Colts, 1953\u201360)", file: 'vintage/IND.png' }],
+    JAX: [{ id: 'vintage', name: "Vintage (1995\u201398 wordmark)", file: 'vintage/JAX.png' }],
+    KC: [{ id: 'vintage', name: "Vintage (Dallas Texans, 1960\u201362)", file: 'vintage/KC.png' }],
+    LAR: [{ id: 'vintage', name: "Vintage (St. Louis Rams, 2000\u201316)", file: 'vintage/LAR.png' }],
+    MIA: [{ id: 'vintage', name: "Vintage (1980\u201396 script)", file: 'vintage/MIA.png' }],
+    MIN: [{ id: 'vintage', name: "Vintage (1961\u201381 wordmark)", file: 'vintage/MIN.png' }],
+    NE: [{ id: 'vintage', name: "Vintage (1960\u201392 wordmark)", file: 'vintage/NE.png' }],
+    NO: [{ id: 'vintage', name: "Vintage (1967\u201384 shield)", file: 'vintage/NO.png' }],
+    NYG: [{ id: 'vintage', name: "Vintage (1976\u201399 GIANTS)", file: 'vintage/NYG.png' }],
+    NYJ: [{ id: 'vintage', name: "Vintage (1978\u201397)", file: 'vintage/NYJ.svg' }],
+    SEA: [{ id: 'vintage', name: "Vintage (1976 wordmark)", file: 'vintage/SEA.svg' }],
+    TEN: [{ id: 'vintage', name: "Vintage (Houston Oilers)", file: 'vintage/TEN.png' }],
+  };
   const NFL_COLORS = {
     ARI: ['#97233F', '#000000'], ATL: ['#A71930', '#000000'], BAL: ['#241773', '#9E7C0C'], BUF: ['#00338D', '#C60C30'],
     CAR: ['#0085CA', '#101820'], CHI: ['#0B162A', '#C83803'], CIN: ['#FB4F14', '#000000'], CLE: ['#311D00', '#FF3C00'],
