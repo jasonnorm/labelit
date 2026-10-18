@@ -165,12 +165,12 @@ button { font: inherit; cursor: pointer; }
 .preview-stage {
   background: var(--stage);
   border-radius: 10px;
-  padding: clamp(16px, 5vw, 48px);
+  padding: clamp(12px, 2.5vw, 28px);
   display: flex; justify-content: center;
 }
 #label-canvas {
   width: 100%;
-  max-width: 760px;
+  max-width: 900px;
   aspect-ratio: 2.5 / 0.75;
   height: auto;
   display: block;
@@ -278,10 +278,55 @@ input[type="range"] { width: 100%; accent-color: var(--focus); }
 
 #print-area { display: none; }
 
+/* Toolbar: undo / redo */
+.toolbar-actions { display: flex; align-items: center; gap: 2px; }
+.icon-btn {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 30px; height: 28px; border-radius: 6px; border: 1px solid transparent;
+  background: none; color: var(--ink); font-size: 1.05rem; line-height: 1; cursor: pointer;
+}
+.icon-btn:hover:not(:disabled) { background: color-mix(in srgb, var(--muted) 15%, transparent); }
+.icon-btn:disabled { color: var(--muted); opacity: 0.4; cursor: default; }
+.toolbar-sep { width: 1px; height: 18px; background: var(--line); margin: 0 4px; }
+
+/* Printing tips */
+.tips { font-size: 0.8125rem; color: var(--muted); }
+.tips summary { cursor: pointer; width: fit-content; }
+.tips summary:hover { color: var(--ink); }
+.tips ul { margin: 6px 0 0; padding-left: 18px; display: grid; gap: 4px; }
+
+/* Toast (e.g. "Label reset · Undo") */
+.toast {
+  position: fixed; left: 50%; bottom: 20px; transform: translate(-50%, 20px); opacity: 0;
+  display: flex; align-items: center; gap: 12px; padding: 10px 14px; border-radius: 10px;
+  background: var(--ink); color: var(--panel); font-size: 0.875rem; z-index: 100;
+  box-shadow: 0 8px 24px rgba(0,0,0,.25); transition: opacity .18s ease, transform .18s ease; pointer-events: none;
+}
+.toast.show { opacity: 1; transform: translate(-50%, 0); pointer-events: auto; }
+.toast button { background: none; border: 0; color: var(--panel); font: inherit; font-weight: 700; text-decoration: underline; cursor: pointer; padding: 0; }
+
 @media (max-width: 860px) {
-  .layout { grid-template-columns: 1fr; padding: 0 16px; margin: 16px auto; }
-  .preview-panel { position: static; order: -1; }
+  .layout { grid-template-columns: 1fr; padding: 0 16px; margin: 0 auto 16px; }
   .app-header { padding: 16px; }
+  .preview-panel { order: -1; }
+  .preview-head { margin-bottom: 6px; }
+  .preview-head h2 { font-size: 0.875rem; }
+  .preview-stage { padding: 8px; }
+  .export-slot { order: 1; }
+  /* Keep the preview to roughly a quarter of the screen height (label is 10:3, double is 5:3) */
+  #label-canvas { max-width: min(100%, 85vh); }
+  #label-canvas.double { max-width: min(100%, 42vh); }
+}
+/* Narrow and tall enough (phones, narrow windows): pin the compact preview while editing */
+@media (max-width: 860px) and (min-height: 540px) {
+  .preview-panel {
+    position: sticky; top: 0; z-index: 20;
+    margin: 0 -16px; padding: 10px 16px 12px; border-radius: 0 0 14px 14px;
+    border-top: 0; box-shadow: 0 6px 18px rgba(0,0,0,.18);
+  }
+}
+@media (max-width: 420px) {
+  .team-row { grid-template-columns: 1fr; }
 }
 
 /* ---------- print ---------- */
@@ -331,7 +376,10 @@ input[type="range"] { width: 100%; accent-color: var(--focus); }
       <form id="label-form" autocomplete="off">
         <div class="form-toolbar">
           <h2>Label settings</h2>
-          <div>
+          <div class="toolbar-actions">
+            <button type="button" class="icon-btn" id="undo" title="Undo (⌘Z / Ctrl+Z)" aria-label="Undo" disabled><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11"/></svg></button>
+            <button type="button" class="icon-btn" id="redo" title="Redo (⇧⌘Z / Ctrl+Y)" aria-label="Redo" disabled><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 14 5-5-5-5"/><path d="M20 9H9.5a5.5 5.5 0 0 0 0 11H13"/></svg></button>
+            <span class="toolbar-sep" aria-hidden="true"></span>
             <button type="button" class="btn-ghost" id="expand-all">Expand all</button>
             <button type="button" class="btn-ghost" id="collapse-all">Collapse all</button>
           </div>
@@ -509,7 +557,7 @@ input[type="range"] { width: 100%; accent-color: var(--focus); }
               <label class="field">
                 <span id="team-label">MLB team</span>
                 <select name="mlbTeam" id="mlb-team">
-                  <option value="">None — or upload your own below</option>
+                  <option value="">No team</option>
                 </select>
               </label>
               <label class="field">
@@ -675,6 +723,9 @@ input[type="range"] { width: 100%; accent-color: var(--focus); }
       </form>
     </section>
 
+    <!-- On phones, Print & export moves here (below the settings) so the pinned preview stays small -->
+    <section class="panel export-slot" id="export-slot" aria-label="Print and export" hidden></section>
+
     <section class="panel preview-panel" aria-label="Preview and export">
       <div class="preview-head">
         <h2>Preview</h2>
@@ -716,7 +767,16 @@ input[type="range"] { width: 100%; accent-color: var(--focus); }
           </label>
           <button type="button" class="btn-secondary" id="print">Print</button>
         </div>
-        <p class="hint">Print at <strong>100% / Actual size</strong> (turn off “Fit to page”) and use a regular, <strong>not borderless</strong>, paper size so the label comes out exactly 2.5″ × 0.75″. Borderless printing enlarges the image by a few percent. When printing a downloaded PNG, open it in Preview (Photos ignores its print size).</p>
+        <p class="hint">Print at <strong>100% / Actual size</strong> on a regular (<strong>not borderless</strong>) paper size.</p>
+        <details class="tips">
+          <summary>Printing tips</summary>
+          <ul>
+            <li>Turn off “Fit to page” / “Scale to fit” so the label comes out exactly 2.5″ × 0.75″.</li>
+            <li>Borderless paper sizes enlarge the image by a few percent, so labels print slightly too wide.</li>
+            <li>To print a downloaded PNG, open it in Preview — Photos ignores its print size.</li>
+            <li>On a Letter sheet, cut along the dashed lines; double-sided labels fold at the small tick marks.</li>
+          </ul>
+        </details>
       </div>
     </section>
   </main>
@@ -2335,6 +2395,7 @@ input[type="range"] { width: 100%; accent-color: var(--focus); }
       if (qrBack()) result = SlabLabel.render(back, { ...data, qrOnly: true }, DPI);
       compose();
       updateSummaries(data);
+      recordHistory();
       qrInput.classList.toggle('invalid', result.qrTooLong);
       qrInput.title = !result.qrTooLong ? ''
         : typeof window.qrcode !== 'function' ? 'QR library could not load (are you offline?)'
@@ -2401,12 +2462,115 @@ input[type="range"] { width: 100%; accent-color: var(--focus); }
   form.addEventListener('input', (e) => { if (!e.target.classList.contains('hex-input')) update(); });
   form.addEventListener('submit', (e) => e.preventDefault());
 
+  // ---------- Undo / redo ----------
+  // Snapshots of the whole label (settings + images), recorded shortly after each change.
+  const history = [];
+  let histIndex = -1;
+  let restoring = true;   // ignore changes until the saved label has finished loading
+  let histTimer = 0;
+  const undoBtn = document.getElementById('undo');
+  const redoBtn = document.getElementById('redo');
+  function snapshot() {
+    return {
+      form: readForm(), double: doubleBox.checked, backMode: backMode(), foldLine: foldBox.checked,
+      images: { logo: [logo.dataUrl, logo.name], brand: [brand.dataUrl, brand.name], bg: [bg.dataUrl, bg.name] },
+    };
+  }
+  function sameSnapshot(a, b) {
+    if (!a || !b) return false;
+    const plain = (s) => JSON.stringify([s.form, s.double, s.backMode, s.foldLine]);
+    return plain(a) === plain(b) && ['logo', 'brand', 'bg'].every((k) => a.images[k][0] === b.images[k][0]);
+  }
+  function syncUndoButtons() {
+    undoBtn.disabled = histIndex <= 0;
+    redoBtn.disabled = histIndex >= history.length - 1;
+  }
+  function recordHistory() {
+    if (restoring) return;
+    clearTimeout(histTimer);
+    histTimer = setTimeout(() => {
+      const s = snapshot();
+      if (sameSnapshot(s, history[histIndex])) return;
+      history.splice(histIndex + 1);
+      history.push(s);
+      if (history.length > 80) history.shift();
+      histIndex = history.length - 1;
+      syncUndoButtons();
+    }, 450);
+  }
+  async function restoreSnapshot(s) {
+    restoring = true;
+    clearTimeout(histTimer);
+    writeForm(s.form);
+    doubleBox.checked = s.double;
+    foldBox.checked = s.foldLine;
+    backRadios.forEach((r) => { r.checked = r.value === s.backMode; });
+    for (const [slot, key] of [[logo, 'logo'], [brand, 'brand'], [bg, 'bg']]) {
+      const [url, name] = s.images[key];
+      if (url !== slot.dataUrl) await slot.set(url || null, name);
+    }
+    update();
+    syncUndoButtons();
+    setTimeout(() => { restoring = false; }, 600);
+  }
+  function undo() { if (histIndex > 0) { histIndex -= 1; restoreSnapshot(history[histIndex]); } }
+  function redo() { if (histIndex < history.length - 1) { histIndex += 1; restoreSnapshot(history[histIndex]); } }
+  undoBtn.addEventListener('click', undo);
+  redoBtn.addEventListener('click', redo);
+  document.addEventListener('keydown', (e) => {
+    if (!(e.metaKey || e.ctrlKey) || e.altKey) return;
+    // In a text box, leave ⌘Z to the browser so it undoes typing there
+    const t = e.target;
+    if (t && (t.tagName === 'TEXTAREA' || (t.tagName === 'INPUT' && /^(text|url|number|search)$/.test(t.type)))) return;
+    const k = e.key.toLowerCase();
+    if (k === 'z' && !e.shiftKey) { e.preventDefault(); undo(); }
+    else if ((k === 'z' && e.shiftKey) || k === 'y') { e.preventDefault(); redo(); }
+  });
+
+  // Small notice with an Undo action
+  let toastTimer = 0;
+  function toast(message, actionLabel, action) {
+    let el = document.getElementById('toast');
+    if (!el) {
+      el = document.createElement('div');
+      el.id = 'toast';
+      el.className = 'toast';
+      el.setAttribute('role', 'status');
+      document.body.appendChild(el);
+    }
+    el.innerHTML = '';
+    el.append(message);
+    if (actionLabel) {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.textContent = actionLabel;
+      b.addEventListener('click', () => { el.classList.remove('show'); action(); });
+      el.appendChild(b);
+    }
+    el.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => el.classList.remove('show'), 6000);
+  }
+
   document.getElementById('reset').addEventListener('click', () => {
     writeForm({ ...DEFAULTS, yearSet: '', player: '', parallel: '', cardNo: '', serial: '' });
     logo.set(null);
     brand.set(null);
     bg.set(null);
+    toast('Label reset.', 'Undo', undo);
   });
+
+  // ---------- Phones: Print & export goes below the settings; the preview stays pinned on top ----------
+  const exportEl = document.querySelector('.export');
+  const exportSlot = document.getElementById('export-slot');
+  const previewPanel = document.querySelector('.preview-panel');
+  const narrow = window.matchMedia('(max-width: 860px)');
+  function placeExport() {
+    if (narrow.matches) { exportSlot.appendChild(exportEl); exportSlot.hidden = false; }
+    else { previewPanel.appendChild(exportEl); exportSlot.hidden = true; }
+  }
+  narrow.addEventListener('change', placeExport);
+  placeExport();
 
   // ---------- export ----------
   function fileBase() {
@@ -2502,11 +2666,19 @@ input[type="range"] { width: 100%; accent-color: var(--focus); }
   doubleBox.checked = !!(saved && saved.double);
   foldBox.checked = !(saved && saved.foldLine === false);
   backRadios.forEach((r) => { r.checked = r.value === ((saved && saved.backMode) || 'same'); });
-  if (saved && saved.logoDataUrl) logo.set(saved.logoDataUrl, saved.logoFileName);
+  const loading = [];
+  if (saved && saved.logoDataUrl) loading.push(logo.set(saved.logoDataUrl, saved.logoFileName));
   // A saved stadium is reloaded from its file so updated photos show up; uploads come from storage
-  if (saved && saved.stadium && venues().some((s) => stadiumId(s) === saved.stadium)) loadStadium(false);
-  else if (saved && saved.bgDataUrl) bg.set(saved.bgDataUrl, saved.bgFileName);
-  if (saved && saved.brandDataUrl) brand.set(saved.brandDataUrl, saved.brandFileName);
+  if (saved && saved.stadium && venues().some((s) => stadiumId(s) === saved.stadium)) loading.push(loadStadium(false));
+  else if (saved && saved.bgDataUrl) loading.push(bg.set(saved.bgDataUrl, saved.bgFileName));
+  if (saved && saved.brandDataUrl) loading.push(brand.set(saved.brandDataUrl, saved.brandFileName));
+  // Start the undo history once the saved label (including its images) has loaded
+  Promise.allSettled(loading).then(() => setTimeout(() => {
+    restoring = false;
+    history.push(snapshot());
+    histIndex = 0;
+    syncUndoButtons();
+  }, 300));
 
   update();
   // Re-render once the label font has loaded so canvas text uses Arimo, not a fallback.
