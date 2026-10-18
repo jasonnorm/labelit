@@ -1978,8 +1978,50 @@ input[type="range"] { width: 100%; accent-color: var(--focus); }
     WAS: ['#002B5C', '#E31837'],
   };
   // NBA arenas (files in backgrounds/arenas/; credits in CREDITS.md)
-  const NBA_ARENAS = [];
-  const NBA_HISTORIC = [];
+  const NBA_ARENAS = [
+    { id: "nba-DAL", team: "DAL", park: "American Airlines Center", file: "DAL.jpg", focus: 0.5 },
+    { id: "nba-DEN", team: "DEN", park: "Ball Arena", file: "DEN.jpg", focus: 0.55 },
+    { id: "nba-BKN", team: "BKN", park: "Barclays Center", file: "BKN.jpg", focus: 0.5 },
+    { id: "nba-WAS", team: "WAS", park: "Capital One Arena", file: "WAS.jpg", focus: 0.55 },
+    { id: "nba-LAL", team: "LAL", park: "Crypto.com Arena", file: "LAL.jpg", focus: 0.5 },
+    { id: "nba-UTA", team: "UTA", park: "Delta Center", file: "UTA.jpg", focus: 0.6 },
+    { id: "nba-MEM", team: "MEM", park: "FedExForum", file: "MEM.jpg", focus: 0.6 },
+    { id: "nba-MIL", team: "MIL", park: "Fiserv Forum", file: "MIL.jpg", focus: 0.55 },
+    { id: "nba-SAS", team: "SAS", park: "Frost Bank Center", file: "SAS.jpg", focus: 0.5 },
+    { id: "nba-IND", team: "IND", park: "Gainbridge Fieldhouse", file: "IND.jpg", focus: 0.5 },
+    { id: "nba-SAC", team: "SAC", park: "Golden 1 Center", file: "SAC.jpg", focus: 0.6 },
+    { id: "nba-LAC", team: "LAC", park: "Intuit Dome", file: "LAC.jpg", focus: 0.55 },
+    { id: "nba-MIA", team: "MIA", park: "Kaseya Center", file: "MIA.jpg", focus: 0.7 },
+    { id: "nba-ORL", team: "ORL", park: "Kia Center", file: "ORL.jpg", focus: 0.6 },
+    { id: "nba-DET", team: "DET", park: "Little Caesars Arena", file: "DET.jpg", focus: 0.5 },
+    { id: "nba-NYK", team: "NYK", park: "Madison Square Garden", file: "NYK.jpg", focus: 0.5 },
+    { id: "nba-POR", team: "POR", park: "Moda Center", file: "POR.jpg", focus: 0.6 },
+    { id: "nba-PHX", team: "PHX", park: "Mortgage Matchup Center", file: "PHX.jpg", focus: 0.6 },
+    { id: "nba-OKC", team: "OKC", park: "Paycom Center", file: "OKC.jpg", focus: 0.6 },
+    { id: "nba-CLE", team: "CLE", park: "Rocket Arena", file: "CLE.jpg", focus: 0.55 },
+    { id: "nba-TOR", team: "TOR", park: "Scotiabank Arena", file: "TOR.jpg", focus: 0.6 },
+    { id: "nba-NOP", team: "NOP", park: "Smoothie King Center", file: "NOP.jpg", focus: 0.6 },
+    { id: "nba-CHA", team: "CHA", park: "Spectrum Center", file: "CHA.jpg", focus: 0.5 },
+    { id: "nba-ATL", team: "ATL", park: "State Farm Arena", file: "ATL.jpg", focus: 0.6 },
+    { id: "nba-MIN", team: "MIN", park: "Target Center", file: "MIN.jpg", focus: 0.6 },
+    { id: "nba-BOS", team: "BOS", park: "TD Garden", file: "BOS.jpg", focus: 0.9 },
+    { id: "nba-HOU", team: "HOU", park: "Toyota Center", file: "HOU.jpg", focus: 0.55 },
+    { id: "nba-CHI", team: "CHI", park: "United Center", file: "CHI.jpg", focus: 0.55 },
+    { id: "nba-PHI", team: "PHI", park: "Xfinity Mobile Arena", file: "PHI.jpg", focus: 0.6 },
+  ];
+  const NBA_HISTORIC = [
+    { id: "nba-hist-ORL", team: "ORL", park: "Amway Arena", years: "1989\u20132010", file: "historic/ORL.jpg", focus: 0.55 },
+    { id: "nba-hist-SAC", team: "SAC", park: "ARCO Arena", years: "1988\u20132016", file: "historic/SAC.jpg", focus: 0.6 },
+    { id: "nba-hist-BOS", team: "BOS", park: "Boston Garden", years: "1946\u20131995", file: "historic/BOS.jpg", focus: 0.5 },
+    { id: "nba-hist-MIL", team: "MIL", park: "Bradley Center", years: "1988\u20132018", file: "historic/MIL.jpg", focus: 0.55 },
+    { id: "nba-hist-CHA", team: "CHA", park: "Charlotte Coliseum", years: "1988\u20132002", file: "historic/CHA.jpg", focus: 0.55 },
+    { id: "nba-hist-CHI", team: "CHI", park: "Chicago Stadium", years: "1967\u20131994", file: "historic/CHI.jpg", focus: 0.5 },
+    { id: "nba-hist-OKC", team: "OKC", park: "KeyArena (SuperSonics)", years: "1967\u20132008", file: "historic/OKC.jpg", focus: 0.2 },
+    { id: "nba-hist-LAC", team: "LAC", park: "LA Memorial Sports Arena", years: "1984\u20131999", file: "historic/LAC.jpg", focus: 0.55 },
+    { id: "nba-hist-MIN", team: "MIN", park: "Metrodome", years: "1989\u20131990", file: "historic/MIN.jpg", focus: 0.55 },
+    { id: "nba-hist-GSW", team: "GSW", park: "Oakland Arena", years: "1971\u20132019", file: "historic/GSW.jpg", focus: 0.55 },
+    { id: "nba-hist-DET", team: "DET", park: "The Palace of Auburn Hills", years: "1988\u20132017", file: "historic/DET.jpg", focus: 0.6 },
+  ];
 
   const mlbSelect = document.getElementById('mlb-team');
   const styleSelect = document.getElementById('team-style');

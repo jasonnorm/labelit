@@ -72,6 +72,53 @@ The historic backgrounds in `backgrounds/stadiums/historic/` are also from Wikim
 | Wrigley Field (c. 1950, Chicago Cubs) | [Curt Teich & Company](https://commons.wikimedia.org/wiki/File:Wrigley_Field,_Chicago.jpg) | Public domain |
 | Yankee Stadium (original) (1923–2008, New York Yankees) | [Bryce Edwards from San Jose, CA, USA](https://commons.wikimedia.org/wiki/File:Yankee_Stadium_Panorama_(1441973100).jpg) | [CC BY 2.0](https://creativecommons.org/licenses/by/2.0/) |
 
+## NBA arena photos
+
+Arena backgrounds in `backgrounds/arenas/` (current) and `backgrounds/arenas/historic/` are from Wikimedia Commons, resized to at most 1600px wide and re-encoded as JPEG. Some photos were taken under an arena's earlier name.
+
+| Arena | Photo by (source) | License |
+|---|---|---|
+| American Airlines Center | [Noah3500](https://commons.wikimedia.org/wiki/File:Nov2025_Dallas_Mavericks_game_panorama.jpg) | [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/) |
+| Ball Arena | [David Herrera from Albuquerque, NM](https://commons.wikimedia.org/wiki/File:Pepsi_Center_interior.jpg) | [CC BY 2.0](https://creativecommons.org/licenses/by/2.0/) |
+| Barclays Center | [X2o](https://commons.wikimedia.org/wiki/File:Panorama_of_Barclays_Center..jpg) | [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/) |
+| Capital One Arena | [Daniel Lobo](https://commons.wikimedia.org/wiki/File:Capital_One_Arena_interior_2017-04-19.jpg) | [CC0](https://creativecommons.org/publicdomain/zero/1.0/) |
+| Crypto.com Arena | [Joan Campderrós-i-Canas from Rubí, Catalonia](https://commons.wikimedia.org/wiki/File:Staples_Center_panoramic_(16763114516).jpg) | [CC BY 2.0](https://creativecommons.org/licenses/by/2.0/) |
+| Delta Center | [Streamline1989](https://commons.wikimedia.org/wiki/File:Energy_Solutions_Arena_Interior.JPG) | Public domain |
+| FedExForum | [theogeo](https://commons.wikimedia.org/wiki/File:FedExForumgrizzlies19nov2007.jpg) | [CC BY 2.0](https://creativecommons.org/licenses/by/2.0/) |
+| Fiserv Forum | [Ryan Dickey from Evanston, IL](https://commons.wikimedia.org/wiki/File:Fiserv_Forum_(51741499194).jpg) | [CC BY 2.0](https://creativecommons.org/licenses/by/2.0/) |
+| Frost Bank Center | [Katie Haugland Bowen](https://commons.wikimedia.org/wiki/File:Los_Angeles_Lakers_vs_San_Antonio_Spurs_2012.jpg) | [CC BY 2.0](https://creativecommons.org/licenses/by/2.0/) |
+| Gainbridge Fieldhouse | [adstarkel](https://commons.wikimedia.org/wiki/File:Bankers_Life_for_Pacers_Game.jpg) | [CC BY-SA 2.0](https://creativecommons.org/licenses/by-sa/2.0/) |
+| Golden 1 Center | [Mrbeastmodeallday](https://commons.wikimedia.org/wiki/File:G1C_Interior_(cropped).jpg) | [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/) |
+| Intuit Dome | [Spatms](https://commons.wikimedia.org/wiki/File:Intuit_Dome_Court.jpg) | [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/) |
+| Kaseya Center | [Ven-Lib](https://commons.wikimedia.org/wiki/File:Ftxarena.jpg) | [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/) |
+| Kia Center | [350z33](https://commons.wikimedia.org/wiki/File:AmwayCenterCourt.JPG) | [CC BY-SA 3.0](https://creativecommons.org/licenses/by-sa/3.0/) |
+| Little Caesars Arena | [Coreyfein01](https://commons.wikimedia.org/wiki/File:Interior_of_little_Caesars_arena_panorama.jpg) | [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/) |
+| Madison Square Garden | [Matt Pirecki](https://commons.wikimedia.org/wiki/File:Knicks_v_Thunder_2010_MSG.jpg) | [CC BY 2.0](https://creativecommons.org/licenses/by/2.0/) |
+| Moda Center | [Cacophony](https://commons.wikimedia.org/wiki/File:RoseGardenArenaInterior3.jpg) | [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/) |
+| Mortgage Matchup Center | [Jeff Turner](https://commons.wikimedia.org/wiki/File:USAirwaysCenter-2008NCAAWestRegional.jpg) | [CC BY 2.0](https://creativecommons.org/licenses/by/2.0/) |
+| Paycom Center | [Michael Barera](https://commons.wikimedia.org/wiki/File:Oklahoma_City_Thunder_vs._Milwaukee_Bucks_March_2024_04_(arena).jpg) | [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/) |
+| Rocket Arena | [Erik Drost](https://commons.wikimedia.org/wiki/File:Quicken_Loans_Arena_3.jpg) | [CC BY 2.0](https://creativecommons.org/licenses/by/2.0/) |
+| Scotiabank Arena | [Yzukerman](https://commons.wikimedia.org/wiki/File:Air_Canada_Centre_interior.jpg) | [CC BY 2.0](https://creativecommons.org/licenses/by/2.0/) |
+| Smoothie King Center | [Andrea Ciambra](https://commons.wikimedia.org/wiki/File:Showtime!_—_New_Orleans,_USA.jpg) | [CC BY 2.0](https://creativecommons.org/licenses/by/2.0/) |
+| Spectrum Center | [Daniel Barcelona](https://commons.wikimedia.org/wiki/File:Time_Warner_Lakers.jpg) | [CC BY 3.0](https://creativecommons.org/licenses/by/3.0/) |
+| State Farm Arena | [Bama in ATL](https://commons.wikimedia.org/wiki/File:State_Farm_Arena_-_Bulls_VS_Hawks_NBA_Game.jpg) | [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/) |
+| Target Center | [Bobak Ha'Eri](https://commons.wikimedia.org/wiki/File:012308-TC-Twolves001.jpg) | [CC BY 3.0](https://creativecommons.org/licenses/by/3.0/) |
+| TD Garden | [Eric Kilby](https://commons.wikimedia.org/wiki/File:Center_Court_Panorama.jpg) | [CC BY-SA 2.0](https://creativecommons.org/licenses/by-sa/2.0/) |
+| Toyota Center | [Hequalstohenry (en.wikipedia)](https://commons.wikimedia.org/wiki/File:Toyota_Center_inside.jpg) | Public domain |
+| United Center | [Jordano53](https://commons.wikimedia.org/wiki/File:United_Center_pano.jpg) | [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/) |
+| Xfinity Mobile Arena | [Peetlesnumber1](https://commons.wikimedia.org/wiki/File:76ers_WFC_2016.jpg) | [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/) |
+| Amway Arena (1989–2010) | [Ttodaizzm](https://commons.wikimedia.org/wiki/File:Magic_lakers09.JPG) | [CC BY-SA 3.0](https://creativecommons.org/licenses/by-sa/3.0/) |
+| ARCO Arena (1988–2016) | [LWYang](https://commons.wikimedia.org/wiki/File:Sleep_Train_Arena_December_2013.jpg) | [CC BY 2.0](https://creativecommons.org/licenses/by/2.0/) |
+| Boston Garden (1946–1995) | [Troy Parla](https://commons.wikimedia.org/wiki/File:BostonGardenNHL.jpg) | [CC BY-SA 3.0](https://creativecommons.org/licenses/by-sa/3.0/) |
+| Bradley Center (1988–2018) | [Jeramey Jannene from Milwaukee, WI](https://commons.wikimedia.org/wiki/File:Brian_Skinner_(5387839808).jpg) | [CC BY 2.0](https://creativecommons.org/licenses/by/2.0/) |
+| Charlotte Coliseum (1988–2002) | [Miller17CU94 (en.wikipedia)](https://commons.wikimedia.org/wiki/File:CharlotteColiseum2000.jpg) | Public domain |
+| Chicago Stadium (1967–1994) | [Unknown author](https://commons.wikimedia.org/wiki/File:Chicago_Stadium_1930.jpeg) | Public domain |
+| KeyArena (SuperSonics) (1967–2008) | [Hal](https://commons.wikimedia.org/wiki/File:KeyArena_pano.jpg) | [CC BY-SA 3.0](https://creativecommons.org/licenses/by-sa/3.0/) |
+| LA Memorial Sports Arena (1984–1999) | [Neon Tommy](https://commons.wikimedia.org/wiki/File:Los_angeles_sports_arena.jpg) | [CC BY-SA 2.0](https://creativecommons.org/licenses/by-sa/2.0/) |
+| Metrodome (1989–1990) | [Bobak Ha'Eri](https://commons.wikimedia.org/wiki/File:2009-0319-NCAAs-002-MetrodomeBBall.JPG) | [CC BY 3.0](https://creativecommons.org/licenses/by/3.0/) |
+| Oakland Arena (1971–2019) | [Bryce Edwards](https://commons.wikimedia.org/wiki/File:GSW_Vs_Utah.jpg) | [CC BY 2.0](https://creativecommons.org/licenses/by/2.0/) |
+| The Palace of Auburn Hills (1988–2017) | [Michael Barera](https://commons.wikimedia.org/wiki/File:Atlanta_Hawks_vs._Detroit_Pistons_January_2015_04.jpg) | [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/) |
+
 ## Logos
 
 Vintage team logos in `logos/mlb/vintage/` come from Wikimedia Commons, where they are marked public domain (mostly PD-textlogo / expired copyright); four cap logos had their square cap background removed. Like all team logos, they remain trademarks.
