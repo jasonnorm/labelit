@@ -119,6 +119,59 @@ Arena backgrounds in `backgrounds/arenas/` (current) and `backgrounds/arenas/his
 | Oakland Arena (1971–2019) | [Bryce Edwards](https://commons.wikimedia.org/wiki/File:GSW_Vs_Utah.jpg) | [CC BY 2.0](https://creativecommons.org/licenses/by/2.0/) |
 | The Palace of Auburn Hills (1988–2017) | [Michael Barera](https://commons.wikimedia.org/wiki/File:Atlanta_Hawks_vs._Detroit_Pistons_January_2015_04.jpg) | [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/) |
 
+## NFL stadium photos
+
+Stadium backgrounds in `backgrounds/nfl/` (current) and `backgrounds/nfl/historic/` are from Wikimedia Commons, resized to at most 1600px wide and re-encoded as JPEG. Some photos were taken under a stadium's earlier name.
+
+| Stadium | Photo by (source) | License |
+|---|---|---|
+| Acrisure Stadium | [Tyrol5](https://commons.wikimedia.org/wiki/File:Heinz_Field_Panorama.JPG) | [CC BY-SA 3.0](https://creativecommons.org/licenses/by-sa/3.0/) |
+| Allegiant Stadium | [Ken Lund from Reno, Nevada, USA](https://commons.wikimedia.org/wiki/File:Vegas_Kickoff_Classic,_Brigham_Young_University_(BYU)_Cougars_24,_University_of_Arizona_Wildcats_16,_Allegiant_Stadium,_Las_Vegas,_Nevada_(52675078445).jpg) | [CC BY-SA 2.0](https://creativecommons.org/licenses/by-sa/2.0/) |
+| AT&T Stadium | [B. Johnson](https://commons.wikimedia.org/wiki/File:2017_Cotton_Bowl_Classic_AT%26T_Stadium.jpg) | [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/) |
+| Bank of America Stadium | [User:B](https://commons.wikimedia.org/wiki/File:2016_Belk_Bowl.jpg) | [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/) |
+| Caesars Superdome | [elisfkc2](https://commons.wikimedia.org/wiki/File:Super_Bowl_LIX_(54361947329).jpg) | [CC BY-SA 2.0](https://creativecommons.org/licenses/by-sa/2.0/) |
+| Empower Field at Mile High | [Jeffrey Beall](https://commons.wikimedia.org/wiki/File:Sports_Authority_Field_at_Mile_High_(flag_United_States).jpg) | [CC BY-SA 2.0](https://creativecommons.org/licenses/by-sa/2.0/) |
+| EverBank Stadium | [Doctorindy](https://commons.wikimedia.org/wiki/File:JaguarsBengalsJan2000.jpg) | [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/) |
+| Ford Field | [Mrmiscellanious](https://commons.wikimedia.org/wiki/File:Ford-Field-September-10-2006.jpg) | [CC BY 2.5](https://creativecommons.org/licenses/by/2.5/) |
+| GEHA Field at Arrowhead Stadium | [elisfkc2](https://commons.wikimedia.org/wiki/File:Raiders_at_Chiefs_(54233267717)_(cropped).jpg) | [CC BY-SA 2.0](https://creativecommons.org/licenses/by-sa/2.0/) |
+| Gillette Stadium | [Kenneth C. Zirkel](https://commons.wikimedia.org/wiki/File:Gillette_Stadium_panorama.jpg) | [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/) |
+| Hard Rock Stadium | [elisfkc2](https://commons.wikimedia.org/wiki/File:Hard_Rock_Stadium_for_Super_Bowl_LIV_(49606707583).jpg) | [CC BY-SA 2.0](https://creativecommons.org/licenses/by-sa/2.0/) |
+| Highmark Stadium | [Dekema](https://commons.wikimedia.org/wiki/File:HighmarkDay.jpg) | [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/) |
+| Huntington Bank Field | [Jon Ridinger from Kent, Ohio, United States](https://commons.wikimedia.org/wiki/File:FirstEnergy_Stadium_panorama_2015.jpg) | [CC BY 2.0](https://creativecommons.org/licenses/by/2.0/) |
+| Lambeau Field | [Mtyson84](https://commons.wikimedia.org/wiki/File:Lambeau_Field_in_December_2016_during_a_game_versus_the_Seattle_Seahawks.jpg) | [CC0](https://creativecommons.org/publicdomain/zero/1.0/) |
+| Levi's Stadium | [Dvortygirl](https://commons.wikimedia.org/wiki/File:Levis_stadium_panorama_IMG_20191107_150359122.jpg) | [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/) |
+| Lincoln Financial Field | [JJonahJackalope](https://commons.wikimedia.org/wiki/File:Lincoln_Financial_Field,_Philadelphia,_2024.jpg) | [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/) |
+| Lucas Oil Stadium | [Hayden Schiff](https://commons.wikimedia.org/wiki/File:Lucas_Oil_Stadium_WCNA_tour_2024-10-04_193549019.PANO.jpg) | [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/) |
+| Lumen Field | [SounderBruce from Seattle, United States](https://commons.wikimedia.org/wiki/File:CenturyLink_Field_panorama_from_Section_324_(21182723826).jpg) | [CC BY-SA 2.0](https://creativecommons.org/licenses/by-sa/2.0/) |
+| M&T Bank Stadium | [Maryland GovPics](https://commons.wikimedia.org/wiki/File:Ravens_Vs_Commanders_(52318424929).jpg) | [CC BY 2.0](https://creativecommons.org/licenses/by/2.0/) |
+| Mercedes-Benz Stadium | [elisfkc from Orlando, FL, United States](https://commons.wikimedia.org/wiki/File:Peach_Bowl_Pre-game_(38723446434).jpg) | [CC BY-SA 2.0](https://creativecommons.org/licenses/by-sa/2.0/) |
+| MetLife Stadium | [Elbert Hampton](https://commons.wikimedia.org/wiki/File:New_York_Giants_vs_Detroit_Lions_-_20_nov._2022_-_MetLife_Stadium_-_file_05.jpg) | [CC0](https://creativecommons.org/publicdomain/zero/1.0/) |
+| Nissan Stadium | [Alberto Cabello](https://commons.wikimedia.org/wiki/File:LP_Field.jpg) | [CC BY 2.0](https://creativecommons.org/licenses/by/2.0/) |
+| Northwest Stadium | [Assaf Yekuel](https://commons.wikimedia.org/wiki/File:Washington_Redskins_Vs_Atlanta_Falcons_07.10.2012_FedEx_002.jpg) | [CC BY-SA 3.0](https://creativecommons.org/licenses/by-sa/3.0/) |
+| NRG Stadium | [rkimpeljr (Flickr)](https://commons.wikimedia.org/wiki/File:Reliant_stadium.jpg) | [CC BY-SA 2.0](https://creativecommons.org/licenses/by-sa/2.0/) |
+| Paycor Stadium | [JonRidinger](https://commons.wikimedia.org/wiki/File:Paul_Brown_Stadium_interior_2017.jpg) | [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/) |
+| Raymond James Stadium | [Lonelykicker17](https://commons.wikimedia.org/wiki/File:RJSPAN.jpg) | [CC BY-SA 3.0](https://creativecommons.org/licenses/by-sa/3.0/) |
+| SoFi Stadium | [Thank You (21 Millions+) views](https://commons.wikimedia.org/wiki/File:SoFi_Stadium_(Los_Angeles,_USA).jpg) | [CC BY 2.0](https://creativecommons.org/licenses/by/2.0/) |
+| SoFi Stadium | [Thank You (21 Millions+) views](https://commons.wikimedia.org/wiki/File:SoFi_Stadium_-_50_Yard_Line_(51140279795).jpg) | [CC BY 2.0](https://creativecommons.org/licenses/by/2.0/) |
+| Soldier Field | [Jim Larrison from Glen Ellyn, IL, USA](https://commons.wikimedia.org/wiki/File:Chicago_Bears_vs_Green_Bay_Packers_-_Thanksgiving_Night_2015_(22816613853).jpg) | [CC BY 2.0](https://creativecommons.org/licenses/by/2.0/) |
+| State Farm Stadium | [Ixnayonthetimmay](https://commons.wikimedia.org/wiki/File:UnivOfPhxStad_09272009_pregamePano.jpg) | [CC BY-SA 3.0](https://creativecommons.org/licenses/by-sa/3.0/) |
+| U.S. Bank Stadium | [Myotus](https://commons.wikimedia.org/wiki/File:Panorama-US_Bank_Stadium_Interior.jpg) | [CC0](https://creativecommons.org/publicdomain/zero/1.0/) |
+| Candlestick Park (1971–2013) | [Gateman1997](https://commons.wikimedia.org/wiki/File:CandlestickPanoramaSept08.JPG) | [CC BY-SA 3.0](https://creativecommons.org/licenses/by-sa/3.0/) |
+| Cleveland Municipal Stadium (1946–1995) | [Columbus Metropolitan Library (via DPLA)](https://commons.wikimedia.org/wiki/File:Football_at_Cleveland_Stadium._-_DPLA_-_a302df9b5f9ca8c2dce1a0a87e92f4cb_(page_1).jpg) | No restrictions |
+| Georgia Dome (1992–2016) | [Latics](https://commons.wikimedia.org/wiki/File:Georgia_Dome_2008-08-30_2.jpg) | [CC BY-SA 3.0](https://creativecommons.org/licenses/by-sa/3.0/) |
+| Jack Murphy / Qualcomm Stadium (1967–2016) | [Polupharmakos](https://commons.wikimedia.org/wiki/File:Qualcomm_Stadium_panorama,_4th_quarter_2012_Holiday_Bowl.jpg) | [CC BY-SA 3.0](https://creativecommons.org/licenses/by-sa/3.0/) |
+| LA Memorial Coliseum (1946–1979) | [Bobak Ha'Eri](https://commons.wikimedia.org/wiki/File:2008-1101-USCWash-pan-001.JPG) | [CC BY 3.0](https://creativecommons.org/licenses/by/3.0/) |
+| Metrodome (1982–2013) | [Bobak Ha'Eri](https://commons.wikimedia.org/wiki/File:2008-1108-MN-MI-MetrodomePan01.JPG) | [CC BY 3.0](https://creativecommons.org/licenses/by/3.0/) |
+| Polo Grounds (1925–1955) | [Library of Congress](https://commons.wikimedia.org/wiki/File:Polo_grounds_panorama.jpg) | Public domain |
+| RCA Dome (1984–2007) | [Josh Hallett from Winter Haven, FL, USA](https://commons.wikimedia.org/wiki/File:HoosierRCADome.jpg) | [CC BY-SA 2.0](https://creativecommons.org/licenses/by-sa/2.0/) |
+| RFK Stadium (1961–1996) | [Phillyfan0419](https://commons.wikimedia.org/wiki/File:DC_United.jpg) | [CC BY-SA 3.0](https://creativecommons.org/licenses/by-sa/3.0/) |
+| Rich Stadium (old Highmark) (1973–2025) | [Quintin Soloviev](https://commons.wikimedia.org/wiki/File:Highmark_Stadium_interior_empty.jpg) | [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/) |
+| Soldier Field (1927) | [Chicago Tribune](https://commons.wikimedia.org/wiki/File:USC_at_Notre_Dame_November_1927_at_Soldier_Field.jpg) | Public domain |
+| Sun Devil Stadium (1988–2005) | [Beyond My Ken](https://commons.wikimedia.org/wiki/File:2021_Sun_Devil_Stadium_(pano).jpg) | [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/) |
+| Texas Stadium (1971–2008) | [Father of Nehrams2020](https://commons.wikimedia.org/wiki/File:TexasStadiuminterior.jpg) | [CC BY-SA 3.0](https://creativecommons.org/licenses/by-sa/3.0/) |
+| Tulane Stadium (1967–1974) | [Barbara Spengler](https://commons.wikimedia.org/wiki/File:Tulane_Stadium_-_Navy_at_Tulane_-_November_1973.jpg) | [CC BY 2.0](https://creativecommons.org/licenses/by/2.0/) |
+| Veterans Stadium (1971–2002) | [User:B](https://commons.wikimedia.org/wiki/File:2001_Virginia_Tech_Temple_Hokie_entrance.jpg) | [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/) |
+
 ## Logos
 
 Vintage team logos in `logos/mlb/vintage/` come from Wikimedia Commons, where they are marked public domain (mostly PD-textlogo / expired copyright); four cap logos had their square cap background removed. Like all team logos, they remain trademarks.

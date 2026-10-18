@@ -2127,8 +2127,57 @@ input[type="range"] { width: 100%; accent-color: var(--focus); }
     SEA: ['#002244', '#69BE28'], TB: ['#D50A0A', '#34302B'], TEN: ['#0C2340', '#4B92DB'], WAS: ['#5A1414', '#FFB612'],
   };
   // NFL stadiums (files in backgrounds/nfl/; credits in CREDITS.md)
-  const NFL_STADIUMS = [];
-  const NFL_HISTORIC = [];
+  const NFL_STADIUMS = [
+    { id: "nfl-PIT", team: "PIT", park: "Acrisure Stadium", file: "PIT.jpg", focus: 0.5 },
+    { id: "nfl-LV", team: "LV", park: "Allegiant Stadium", file: "LV.jpg", focus: 0.55 },
+    { id: "nfl-DAL", team: "DAL", park: "AT&T Stadium", file: "DAL.jpg", focus: 0.55 },
+    { id: "nfl-CAR", team: "CAR", park: "Bank of America Stadium", file: "CAR.jpg", focus: 0.55 },
+    { id: "nfl-NO", team: "NO", park: "Caesars Superdome", file: "NO.jpg", focus: 0.55 },
+    { id: "nfl-DEN", team: "DEN", park: "Empower Field at Mile High", file: "DEN.jpg", focus: 0.55 },
+    { id: "nfl-JAX", team: "JAX", park: "EverBank Stadium", file: "JAX.jpg", focus: 0.5 },
+    { id: "nfl-DET", team: "DET", park: "Ford Field", file: "DET.jpg", focus: 0.55 },
+    { id: "nfl-KC", team: "KC", park: "GEHA Field at Arrowhead Stadium", file: "KC.jpg", focus: 0.5 },
+    { id: "nfl-NE", team: "NE", park: "Gillette Stadium", file: "NE.jpg", focus: 0.5 },
+    { id: "nfl-MIA", team: "MIA", park: "Hard Rock Stadium", file: "MIA.jpg", focus: 0.55 },
+    { id: "nfl-BUF", team: "BUF", park: "Highmark Stadium", file: "BUF.jpg", focus: 0.55 },
+    { id: "nfl-CLE", team: "CLE", park: "Huntington Bank Field", file: "CLE.jpg", focus: 0.5 },
+    { id: "nfl-GB", team: "GB", park: "Lambeau Field", file: "GB.jpg", focus: 0.5 },
+    { id: "nfl-SF", team: "SF", park: "Levi's Stadium", file: "SF.jpg", focus: 0.55 },
+    { id: "nfl-PHI", team: "PHI", park: "Lincoln Financial Field", file: "PHI.jpg", focus: 0.45 },
+    { id: "nfl-IND", team: "IND", park: "Lucas Oil Stadium", file: "IND.jpg", focus: 0.55 },
+    { id: "nfl-SEA", team: "SEA", park: "Lumen Field", file: "SEA.jpg", focus: 0.6 },
+    { id: "nfl-BAL", team: "BAL", park: "M&T Bank Stadium", file: "BAL.jpg", focus: 0.5 },
+    { id: "nfl-ATL", team: "ATL", park: "Mercedes-Benz Stadium", file: "ATL.jpg", focus: 0.55 },
+    { id: "nfl-NYG", team: "NYG", park: "MetLife Stadium", file: "NYG.jpg", focus: 0.55 },
+    { id: "nfl-NYJ", team: "NYJ", park: "MetLife Stadium", file: "NYJ.jpg", focus: 0.55 },
+    { id: "nfl-TEN", team: "TEN", park: "Nissan Stadium", file: "TEN.jpg", focus: 0.55 },
+    { id: "nfl-WAS", team: "WAS", park: "Northwest Stadium", file: "WAS.jpg", focus: 0.5 },
+    { id: "nfl-HOU", team: "HOU", park: "NRG Stadium", file: "HOU.jpg", focus: 0.5 },
+    { id: "nfl-CIN", team: "CIN", park: "Paycor Stadium", file: "CIN.jpg", focus: 0.55 },
+    { id: "nfl-TB", team: "TB", park: "Raymond James Stadium", file: "TB.jpg", focus: 0.5 },
+    { id: "nfl-LAC", team: "LAC", park: "SoFi Stadium", file: "LAC.jpg", focus: 0.55 },
+    { id: "nfl-LAR", team: "LAR", park: "SoFi Stadium", file: "LAR.jpg", focus: 0.55 },
+    { id: "nfl-CHI", team: "CHI", park: "Soldier Field", file: "CHI.jpg", focus: 0.5 },
+    { id: "nfl-ARI", team: "ARI", park: "State Farm Stadium", file: "ARI.jpg", focus: 0.5 },
+    { id: "nfl-MIN", team: "MIN", park: "U.S. Bank Stadium", file: "MIN.jpg", focus: 0.55 },
+  ];
+  const NFL_HISTORIC = [
+    { id: "nfl-hist-SF", team: "SF", park: "Candlestick Park", years: "1971\u20132013", file: "historic/SF.jpg", focus: 0.5 },
+    { id: "nfl-hist-CLE", team: "CLE", park: "Cleveland Municipal Stadium", years: "1946\u20131995", file: "historic/CLE.jpg", focus: 0.5 },
+    { id: "nfl-hist-ATL", team: "ATL", park: "Georgia Dome", years: "1992\u20132016", file: "historic/ATL.jpg", focus: 0.5 },
+    { id: "nfl-hist-LAC", team: "LAC", park: "Jack Murphy / Qualcomm Stadium", years: "1967\u20132016", file: "historic/LAC.jpg", focus: 0.5 },
+    { id: "nfl-hist-LAR", team: "LAR", park: "LA Memorial Coliseum", years: "1946\u20131979", file: "historic/LAR.jpg", focus: 0.5 },
+    { id: "nfl-hist-MIN", team: "MIN", park: "Metrodome", years: "1982\u20132013", file: "historic/MIN.jpg", focus: 0.5 },
+    { id: "nfl-hist-NYG", team: "NYG", park: "Polo Grounds", years: "1925\u20131955", file: "historic/NYG.jpg", focus: 0.5 },
+    { id: "nfl-hist-IND", team: "IND", park: "RCA Dome", years: "1984\u20132007", file: "historic/IND.jpg", focus: 0.55 },
+    { id: "nfl-hist-WAS", team: "WAS", park: "RFK Stadium", years: "1961\u20131996", file: "historic/WAS.jpg", focus: 0.5 },
+    { id: "nfl-hist-BUF", team: "BUF", park: "Rich Stadium (old Highmark)", years: "1973\u20132025", file: "historic/BUF.jpg", focus: 0.55 },
+    { id: "nfl-hist-CHI", team: "CHI", park: "Soldier Field", years: "1927", file: "historic/CHI.jpg", focus: 0.5 },
+    { id: "nfl-hist-ARI", team: "ARI", park: "Sun Devil Stadium", years: "1988\u20132005", file: "historic/ARI.jpg", focus: 0.55 },
+    { id: "nfl-hist-DAL", team: "DAL", park: "Texas Stadium", years: "1971\u20132008", file: "historic/DAL.jpg", focus: 0.55 },
+    { id: "nfl-hist-NO", team: "NO", park: "Tulane Stadium", years: "1967\u20131974", file: "historic/NO.jpg", focus: 0.5 },
+    { id: "nfl-hist-PHI", team: "PHI", park: "Veterans Stadium", years: "1971\u20132002", file: "historic/PHI.jpg", focus: 0.5 },
+  ];
 
   const mlbSelect = document.getElementById('mlb-team');
   const styleSelect = document.getElementById('team-style');
