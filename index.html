@@ -1194,13 +1194,14 @@ input[type="range"] { width: 100%; accent-color: var(--focus); }
     // white panel, or in the space above the logo when one is shown.
     const step = (b1 - b0) * (size / SPEC.fontSize);
     const capHeight = size * 0.716; // Arimo/Arial cap height ratio
-    // textOffset (inches, + = down) nudges the whole text block; side logos follow it
+    // textOffset (inches, + = down) nudges the text block only
     const mid = (areaTop + areaBottom) / 2 + capHeight / 2 + (Number(data.textOffset) || 0);
     const baselines = [mid - step, mid, mid + step];
 
     // Left/right logos line up with the text block (which moves when items sit on the borders),
     // staying inside the white panel.
-    const textMid = (baselines[0] - capHeight + baselines[2]) / 2;
+    // Side logos line up with the text's automatic position; the manual nudge moves only the text
+    const textMid = (baselines[0] - capHeight + baselines[2]) / 2 - (Number(data.textOffset) || 0);
     const alignToText = (r) => {
       const pad = SPEC.qrInset / 2;
       // Largest height that can stay centered on the text without leaving the panel
