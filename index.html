@@ -342,6 +342,7 @@ input[type="range"] { width: 100%; accent-color: var(--focus); }
           <div class="segmented" role="radiogroup" aria-label="Sport">
             <label><input type="radio" name="sport" value="mlb" checked /><span>Baseball</span></label>
             <label><input type="radio" name="sport" value="nba" /><span>Basketball</span></label>
+            <label><input type="radio" name="sport" value="nfl" /><span>Football</span></label>
           </div>
         </div>
 
@@ -546,7 +547,7 @@ input[type="range"] { width: 100%; accent-color: var(--focus); }
                 </select>
               </label>
             </div>
-            <p class="hint">Click a spot on the label to place the logo. Blank margins and white backgrounds are trimmed automatically.</p>
+            <p class="hint">★ = a vintage logo is available: pick the team, then choose Vintage in Logo style. Click a spot on the label to place the logo. Blank margins and white backgrounds are trimmed automatically.</p>
           </div>
         </details>
         <details class="section" id="sec-set" data-section="set">
@@ -1369,7 +1370,7 @@ input[type="range"] { width: 100%; accent-color: var(--focus); }
   function writeForm(s) {
     const el = form.elements;
     // Sport first: it decides which teams and venues the saved values refer to
-    el.sport.value = s.sport === 'nba' ? 'nba' : 'mlb';
+    el.sport.value = ['nba', 'nfl'].includes(s.sport) ? s.sport : 'mlb';
     applySport();
     ['yearSet', 'player', 'parallel', 'cardNo', 'serial', 'qrUrl'].forEach((k) => { el[k].value = s[k] || ''; });
     el.allCaps.checked = s.allCaps !== false;
@@ -1820,15 +1821,22 @@ input[type="range"] { width: 100%; accent-color: var(--focus); }
   const stadiumId = (s) => s.id || s.team;
 
   // ---------- Sport: picks which teams, logo styles, colors and venues are offered ----------
-  const currentSport = () => (form.elements.sport.value === 'nba' ? 'nba' : 'mlb');
+  const SPORT_IDS = ['mlb', 'nba', 'nfl'];
+  const currentSport = () => (SPORT_IDS.includes(form.elements.sport.value) ? form.elements.sport.value : 'mlb');
   function sportCfg(id = currentSport()) {
-    return id === 'nba'
-      ? { teamLabel: 'NBA team', teams: NBA_TEAMS, styles: NBA_STYLES, extras: NBA_EXTRAS, colors: NBA_COLORS,
-          current: NBA_ARENAS, historic: NBA_HISTORIC, logoDir: 'logos/nba', bgDir: 'backgrounds/arenas',
-          currentLabel: 'Current arenas', historicLabel: 'Historic arenas' }
-      : { teamLabel: 'MLB team', teams: MLB_TEAMS, styles: TEAM_STYLES, extras: TEAM_EXTRAS, colors: TEAM_COLORS,
-          current: STADIUMS, historic: HISTORIC_PARKS, logoDir: 'logos/mlb', bgDir: 'backgrounds/stadiums',
-          currentLabel: 'Current parks', historicLabel: 'Historic parks' };
+    if (id === 'nba') {
+      return { teamLabel: 'NBA team', teams: NBA_TEAMS, styles: NBA_STYLES, extras: NBA_EXTRAS, colors: NBA_COLORS,
+        current: NBA_ARENAS, historic: NBA_HISTORIC, logoDir: 'logos/nba', bgDir: 'backgrounds/arenas',
+        currentLabel: 'Current arenas', historicLabel: 'Historic arenas' };
+    }
+    if (id === 'nfl') {
+      return { teamLabel: 'NFL team', teams: NFL_TEAMS, styles: NFL_STYLES, extras: NFL_EXTRAS, colors: NFL_COLORS,
+        current: NFL_STADIUMS, historic: NFL_HISTORIC, logoDir: 'logos/nfl', bgDir: 'backgrounds/nfl',
+        currentLabel: 'Current stadiums', historicLabel: 'Historic stadiums' };
+    }
+    return { teamLabel: 'MLB team', teams: MLB_TEAMS, styles: TEAM_STYLES, extras: TEAM_EXTRAS, colors: TEAM_COLORS,
+      current: STADIUMS, historic: HISTORIC_PARKS, logoDir: 'logos/mlb', bgDir: 'backgrounds/stadiums',
+      currentLabel: 'Current parks', historicLabel: 'Historic parks' };
   }
   const venues = () => { const c = sportCfg(); return [...c.current, ...c.historic]; };
   // Rebuild the team, style and venue lists for the selected sport
@@ -1836,7 +1844,11 @@ input[type="range"] { width: 100%; accent-color: var(--focus); }
     const c = sportCfg();
     document.getElementById('team-label').textContent = c.teamLabel;
     [...mlbSelect.options].slice(1).forEach((o) => o.remove());
-    Object.entries(c.teams).forEach(([abbr, name]) => mlbSelect.add(new Option(name, abbr)));
+    // ★ marks teams that have a vintage logo (picked in Logo style)
+    Object.entries(c.teams).forEach(([abbr, name]) => {
+      const vintage = (c.extras[abbr] || []).some((e) => e.id === 'vintage');
+      mlbSelect.add(new Option(vintage ? `${name} ★` : name, abbr));
+    });
     stadiumPick.querySelectorAll('optgroup').forEach((g) => g.remove());
     fillStadiums();
     fillStyles('');
@@ -2070,6 +2082,33 @@ input[type="range"] { width: 100%; accent-color: var(--focus); }
     { id: "nba-hist-DET", team: "DET", park: "The Palace of Auburn Hills", years: "1988\u20132017", file: "historic/DET.jpg", focus: 0.6 },
   ];
 
+  // ---------- NFL team logos (files in logos/nfl/<style>/<TEAM>.svg, from nfl.com) ----------
+  const NFL_TEAMS = {
+    ARI: 'Arizona Cardinals', ATL: 'Atlanta Falcons', BAL: 'Baltimore Ravens', BUF: 'Buffalo Bills',
+    CAR: 'Carolina Panthers', CHI: 'Chicago Bears', CIN: 'Cincinnati Bengals', CLE: 'Cleveland Browns',
+    DAL: 'Dallas Cowboys', DEN: 'Denver Broncos', DET: 'Detroit Lions', GB: 'Green Bay Packers',
+    HOU: 'Houston Texans', IND: 'Indianapolis Colts', JAX: 'Jacksonville Jaguars', KC: 'Kansas City Chiefs',
+    LV: 'Las Vegas Raiders', LAC: 'Los Angeles Chargers', LAR: 'Los Angeles Rams', MIA: 'Miami Dolphins',
+    MIN: 'Minnesota Vikings', NE: 'New England Patriots', NO: 'New Orleans Saints', NYG: 'New York Giants',
+    NYJ: 'New York Jets', PHI: 'Philadelphia Eagles', PIT: 'Pittsburgh Steelers', SF: 'San Francisco 49ers',
+    SEA: 'Seattle Seahawks', TB: 'Tampa Bay Buccaneers', TEN: 'Tennessee Titans', WAS: 'Washington Commanders',
+  };
+  const NFL_STYLES = [['primary', 'Primary']];
+  const NFL_EXTRAS = {};
+  const NFL_COLORS = {
+    ARI: ['#97233F', '#000000'], ATL: ['#A71930', '#000000'], BAL: ['#241773', '#9E7C0C'], BUF: ['#00338D', '#C60C30'],
+    CAR: ['#0085CA', '#101820'], CHI: ['#0B162A', '#C83803'], CIN: ['#FB4F14', '#000000'], CLE: ['#311D00', '#FF3C00'],
+    DAL: ['#003594', '#869397'], DEN: ['#FB4F14', '#002244'], DET: ['#0076B6', '#B0B7BC'], GB: ['#203731', '#FFB612'],
+    HOU: ['#03202F', '#A71930'], IND: ['#002C5F', '#A2AAAD'], JAX: ['#006778', '#D7A22A'], KC: ['#E31837', '#FFB81C'],
+    LV: ['#000000', '#A5ACAF'], LAC: ['#0080C6', '#FFC20E'], LAR: ['#003594', '#FFA300'], MIA: ['#008E97', '#FC4C02'],
+    MIN: ['#4F2683', '#FFC62F'], NE: ['#002244', '#C60C30'], NO: ['#D3BC8D', '#101820'], NYG: ['#0B2265', '#A71930'],
+    NYJ: ['#125740', '#000000'], PHI: ['#004C54', '#A5ACAF'], PIT: ['#FFB612', '#101820'], SF: ['#AA0000', '#B3995D'],
+    SEA: ['#002244', '#69BE28'], TB: ['#D50A0A', '#34302B'], TEN: ['#0C2340', '#4B92DB'], WAS: ['#5A1414', '#FFB612'],
+  };
+  // NFL stadiums (files in backgrounds/nfl/; credits in CREDITS.md)
+  const NFL_STADIUMS = [];
+  const NFL_HISTORIC = [];
+
   const mlbSelect = document.getElementById('mlb-team');
   const styleSelect = document.getElementById('team-style');
 
@@ -2120,7 +2159,7 @@ input[type="range"] { width: 100%; accent-color: var(--focus); }
         img = await loadImage(svgDataUrl(await res.text(), 1200));
       }
       if (mlbSelect.value !== abbr || styleSelect.value !== style) return; // changed while loading
-      logo.set(prepareLogo(img), `${c.teams[abbr]}${style === 'primary' ? '' : ' ' + label} logo`);
+      logo.set(prepareLogo(img), `${c.teams[abbr]}${style === 'primary' ? '' : ' ' + label} logo`); // names from the data, without ★
     } catch (e) {
       nameEl.textContent = 'Could not load that logo (open the site, not the file)';
     }

@@ -10,8 +10,9 @@ Custom 2.5″ × 0.75″ slab labels for Zion SlabMag cases, made in the browser
 - Text size, Normal/Bold weight, text color, ALL CAPS
 - Border color (picker, hex, presets) and thickness
 - QR code from any URL
-- Sport selector (Baseball, Basketball) that switches the team logos, team colors and ballparks/arenas offered
+- Sport selector (Baseball, Basketball, Football) that switches the team logos, team colors and ballparks/arenas offered
 - NBA team logo picklist for all 30 teams (Primary, Full logo, and Vintage for 6 teams), plus 29 current and 11 historic arena backgrounds (Boston Garden, Chicago Stadium, Oakland Arena…)
+- NFL team logo picklist for all 32 teams (official nfl.com logos)
 - MLB team logo picklist for all 30 teams, in Primary, Cap or Wordmark style, plus Vintage logos for 19 teams (e.g. Brooklyn Dodgers, Seattle Pilots, Montreal Expos) and extras like the Red Sox circle, or your own logo upload
 - Logos on white backgrounds are cut out automatically, and all logos are scaled smoothly for clean edges
 - Logo position (left, top, bottom or right), auto-trimming, size and image effects
