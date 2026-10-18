@@ -1957,7 +1957,15 @@ input[type="range"] { width: 100%; accent-color: var(--focus); }
     UTA: 'Utah Jazz', WAS: 'Washington Wizards',
   };
   const NBA_STYLES = [['primary', 'Primary'], ['full', 'Full logo']];
-  const NBA_EXTRAS = {};
+  // Vintage NBA logos from Wikimedia Commons (public domain; see CREDITS.md)
+  const NBA_EXTRAS = {
+    DET: [{ id: 'vintage', name: 'Vintage (1957–68)', file: 'vintage/DET.png' }],
+    LAC: [{ id: 'vintage', name: 'Vintage (Buffalo Braves, 1972–78)', file: 'vintage/LAC.png' }],
+    NYK: [{ id: 'vintage', name: 'Vintage (1964–92 ball)', file: 'vintage/NYK.png' }],
+    PHI: [{ id: 'vintage', name: 'Vintage (1977–96)', file: 'vintage/PHI.png' }],
+    SAC: [{ id: 'vintage', name: 'Vintage (Rochester Royals)', file: 'vintage/SAC.svg' }],
+    UTA: [{ id: 'vintage', name: 'Vintage (New Orleans Jazz, 1975–79)', file: 'vintage/UTA.png' }],
+  };
   // Utah is left out on purpose: its colors come from the logo itself
   const NBA_COLORS = {
     ATL: ['#E03A3E', '#C1D32F'], BOS: ['#007A33', '#BA9653'], BKN: ['#000000', '#707271'], CHA: ['#1D1160', '#00788C'],

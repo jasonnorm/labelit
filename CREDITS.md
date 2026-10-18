@@ -76,6 +76,6 @@ The historic backgrounds in `backgrounds/stadiums/historic/` are also from Wikim
 
 Vintage team logos in `logos/mlb/vintage/` come from Wikimedia Commons, where they are marked public domain (mostly PD-textlogo / expired copyright); four cap logos had their square cap background removed. Like all team logos, they remain trademarks.
 
-NBA team logos (`logos/nba/`) are trademarks of their respective teams and the NBA, from cdn.nba.com.
+NBA team logos (`logos/nba/`) are trademarks of their respective teams and the NBA, from cdn.nba.com. Vintage NBA logos in `logos/nba/vintage/` come from Wikimedia Commons, where they are marked public domain (PD-textlogo).
 
 MLB team logos (`logos/mlb/`) are trademarks of their respective clubs and Major League Baseball, from mlbstatic.com. Set logos (`logos/sets/`) are trademarks of Topps, Panini, Upper Deck and Leaf. They are included for personal, non-commercial labeling of your own cards; this project is not affiliated with or endorsed by any of them.
