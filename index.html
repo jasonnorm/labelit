@@ -204,6 +204,7 @@ input[type="range"] { width: 100%; accent-color: var(--focus); }
 /* Collapsible settings sections */
 .form-toolbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
 .form-toolbar h2 { margin: 0; font-size: 1rem; }
+.sport-row { display: flex; align-items: center; gap: 12px; margin: 4px 0 6px; font-size: 0.875rem; font-weight: 500; }
 .form-toolbar .btn-ghost { padding: 4px 6px; font-size: 0.8125rem; }
 .group-label {
   margin: 16px 0 6px; font-size: 0.75rem; font-weight: 600; text-transform: uppercase;
@@ -330,6 +331,14 @@ input[type="range"] { width: 100%; accent-color: var(--focus); }
           <div>
             <button type="button" class="btn-ghost" id="expand-all">Expand all</button>
             <button type="button" class="btn-ghost" id="collapse-all">Collapse all</button>
+          </div>
+        </div>
+
+        <div class="sport-row">
+          <span>Sport</span>
+          <div class="segmented" role="radiogroup" aria-label="Sport">
+            <label><input type="radio" name="sport" value="mlb" checked /><span>Baseball</span></label>
+            <label><input type="radio" name="sport" value="nba" /><span>Basketball</span></label>
           </div>
         </div>
 
@@ -475,7 +484,7 @@ input[type="range"] { width: 100%; accent-color: var(--focus); }
           <div class="section-body">
             <div class="row-2 team-row">
               <label class="field">
-                <span>MLB team</span>
+                <span id="team-label">MLB team</span>
                 <select name="mlbTeam" id="mlb-team">
                   <option value="">None — or upload your own below</option>
                 </select>
@@ -1257,6 +1266,7 @@ input[type="range"] { width: 100%; accent-color: var(--focus); }
   const DPI = 600;
   const STORAGE_KEY = 'labelit:v1';
   const DEFAULTS = {
+    sport: 'mlb',
     yearSet: '2026 Topps Chrome',
     player: 'Shohei Ohtani',
     parallel: 'Gold Refractor',
@@ -1312,6 +1322,7 @@ input[type="range"] { width: 100%; accent-color: var(--focus); }
       borderColor: borderColor.value(),
       textColor: textColor.value(),
       logoEffect: el.logoEffect.value,
+      sport: currentSport(),
       mlbTeam: el.mlbTeam.value,
       teamStyle: el.teamStyle.value || 'primary',
       matchTeam: el.matchTeam.checked,
@@ -1341,6 +1352,9 @@ input[type="range"] { width: 100%; accent-color: var(--focus); }
 
   function writeForm(s) {
     const el = form.elements;
+    // Sport first: it decides which teams and venues the saved values refer to
+    el.sport.value = s.sport === 'nba' ? 'nba' : 'mlb';
+    applySport();
     ['yearSet', 'player', 'parallel', 'cardNo', 'serial', 'qrUrl'].forEach((k) => { el[k].value = s[k] || ''; });
     el.allCaps.checked = s.allCaps !== false;
     el.fontWeight.value = String(s.fontWeight || 400);
@@ -1349,7 +1363,7 @@ input[type="range"] { width: 100%; accent-color: var(--focus); }
     el.logoPos.value = s.logoPos || 'center';
     el.bgOpacity.value = s.bgOpacity != null ? (s.bgOpacity <= 1 ? s.bgOpacity * 100 : s.bgOpacity) : 35;
     el.bgFocus.value = s.bgFocus != null ? Math.round(s.bgFocus <= 1 ? s.bgFocus * 100 : s.bgFocus) : 50;
-    if (s.stadium !== undefined) el.stadium.value = s.stadium || '';
+    if (s.stadium !== undefined) el.stadium.value = venues().some((v) => stadiumId(v) === s.stadium) ? s.stadium : '';
     el.border.value = s.border ? (s.border < 1 ? Math.round(s.border * 1000) : s.border) : 80;
     syncFontSizeOut();
     el.logoEffect.value = s.logoEffect || 'none';
@@ -1757,9 +1771,33 @@ input[type="range"] { width: 100%; accent-color: var(--focus); }
     { id: "hist-NYY", team: "NYY", park: "Yankee Stadium (original)", years: "1923\u20132008", file: "historic/NYY.jpg", focus: 0.5 },
   ];
   const stadiumId = (s) => s.id || s.team;
+
+  // ---------- Sport: picks which teams, logo styles, colors and venues are offered ----------
+  const currentSport = () => (form.elements.sport.value === 'nba' ? 'nba' : 'mlb');
+  function sportCfg(id = currentSport()) {
+    return id === 'nba'
+      ? { teamLabel: 'NBA team', teams: NBA_TEAMS, styles: NBA_STYLES, extras: NBA_EXTRAS, colors: NBA_COLORS,
+          current: NBA_ARENAS, historic: NBA_HISTORIC, logoDir: 'logos/nba', bgDir: 'backgrounds/arenas',
+          currentLabel: 'Current arenas', historicLabel: 'Historic arenas' }
+      : { teamLabel: 'MLB team', teams: MLB_TEAMS, styles: TEAM_STYLES, extras: TEAM_EXTRAS, colors: TEAM_COLORS,
+          current: STADIUMS, historic: HISTORIC_PARKS, logoDir: 'logos/mlb', bgDir: 'backgrounds/stadiums',
+          currentLabel: 'Current parks', historicLabel: 'Historic parks' };
+  }
+  const venues = () => { const c = sportCfg(); return [...c.current, ...c.historic]; };
+  // Rebuild the team, style and venue lists for the selected sport
+  function applySport() {
+    const c = sportCfg();
+    document.getElementById('team-label').textContent = c.teamLabel;
+    [...mlbSelect.options].slice(1).forEach((o) => o.remove());
+    Object.entries(c.teams).forEach(([abbr, name]) => mlbSelect.add(new Option(name, abbr)));
+    stadiumPick.querySelectorAll('optgroup').forEach((g) => g.remove());
+    fillStadiums();
+    fillStyles('');
+  }
   function fillStadiums() {
-    const groups = [['Current parks', STADIUMS, (s) => `${s.park} — ${MLB_TEAMS[s.team] || s.team}`],
-      ['Historic parks', HISTORIC_PARKS, (s) => `${s.park} (${s.years}) — ${MLB_TEAMS[s.team] || s.team}`]];
+    const c = sportCfg();
+    const groups = [[c.currentLabel, c.current, (s) => `${s.park} — ${c.teams[s.team] || s.team}`],
+      [c.historicLabel, c.historic, (s) => `${s.park} (${s.years}) — ${c.teams[s.team] || s.team}`]];
     groups.forEach(([label, list, text]) => {
       if (!list.length) return;
       const g = document.createElement('optgroup');
@@ -1771,12 +1809,12 @@ input[type="range"] { width: 100%; accent-color: var(--focus); }
   // resetBand: true when picked by the user (jump to the park's starting band),
   // false when restoring saved settings (keep the band they chose)
   async function loadStadium(resetBand) {
-    const s = [...STADIUMS, ...HISTORIC_PARKS].find((x) => stadiumId(x) === stadiumPick.value);
+    const s = venues().find((x) => stadiumId(x) === stadiumPick.value);
     if (!s) { if (resetBand) bg.set(null); return false; }
     const nameEl = document.getElementById('bg-name');
     nameEl.textContent = 'Loading…';
     try {
-      const img = await loadImage(`backgrounds/stadiums/${s.file}`);
+      const img = await loadImage(`${sportCfg().bgDir}/${s.file}`);
       if (stadiumPick.value !== stadiumId(s)) return true;
       if (resetBand) {
         form.elements.bgFocus.value = Math.round((s.focus == null ? 0.5 : s.focus) * 100);
@@ -1844,7 +1882,7 @@ input[type="range"] { width: 100%; accent-color: var(--focus); }
     const box = document.querySelector('.match-team');
     box.classList.toggle('disabled', !el.matchTeam.checked);
     if (!el.matchTeam.checked || !logo.img) return;
-    const colors = TEAM_COLORS[el.mlbTeam.value] || logoColors(logo.img);
+    const colors = sportCfg().colors[el.mlbTeam.value] || logoColors(logo.img);
     if (!colors) return;
     borderColor.set(colors[el.teamShade.value === 'secondary' ? 1 : 0]);
   }
@@ -1907,16 +1945,44 @@ input[type="range"] { width: 100%; accent-color: var(--focus); }
     TEX: [{ id: 'vintage', name: "Vintage (1994\u20132002)", file: 'vintage/TEX.png' }],
     WSH: [{ id: 'vintage', name: "Vintage (Montreal Expos, 1992\u20132004)", file: 'vintage/WSH.svg' }],
   };
+  // ---------- NBA team logos (files in logos/nba/<style>/<TEAM>.svg, from cdn.nba.com) ----------
+  const NBA_TEAMS = {
+    ATL: 'Atlanta Hawks', BOS: 'Boston Celtics', BKN: 'Brooklyn Nets', CHA: 'Charlotte Hornets',
+    CHI: 'Chicago Bulls', CLE: 'Cleveland Cavaliers', DAL: 'Dallas Mavericks', DEN: 'Denver Nuggets',
+    DET: 'Detroit Pistons', GSW: 'Golden State Warriors', HOU: 'Houston Rockets', IND: 'Indiana Pacers',
+    LAC: 'LA Clippers', LAL: 'Los Angeles Lakers', MEM: 'Memphis Grizzlies', MIA: 'Miami Heat',
+    MIL: 'Milwaukee Bucks', MIN: 'Minnesota Timberwolves', NOP: 'New Orleans Pelicans', NYK: 'New York Knicks',
+    OKC: 'Oklahoma City Thunder', ORL: 'Orlando Magic', PHI: 'Philadelphia 76ers', PHX: 'Phoenix Suns',
+    POR: 'Portland Trail Blazers', SAC: 'Sacramento Kings', SAS: 'San Antonio Spurs', TOR: 'Toronto Raptors',
+    UTA: 'Utah Jazz', WAS: 'Washington Wizards',
+  };
+  const NBA_STYLES = [['primary', 'Primary'], ['full', 'Full logo']];
+  const NBA_EXTRAS = {};
+  // Utah is left out on purpose: its colors come from the logo itself
+  const NBA_COLORS = {
+    ATL: ['#E03A3E', '#C1D32F'], BOS: ['#007A33', '#BA9653'], BKN: ['#000000', '#707271'], CHA: ['#1D1160', '#00788C'],
+    CHI: ['#CE1141', '#000000'], CLE: ['#860038', '#FDBB30'], DAL: ['#00538C', '#002B5E'], DEN: ['#0E2240', '#FEC524'],
+    DET: ['#C8102E', '#1D42BA'], GSW: ['#1D428A', '#FFC72C'], HOU: ['#CE1141', '#000000'], IND: ['#002D62', '#FDBB30'],
+    LAC: ['#C8102E', '#1D428A'], LAL: ['#552583', '#FDB927'], MEM: ['#5D76A9', '#12173F'], MIA: ['#98002E', '#F9A01B'],
+    MIL: ['#00471B', '#EEE1C6'], MIN: ['#0C2340', '#236192'], NOP: ['#0C2340', '#C8102E'], NYK: ['#006BB6', '#F58426'],
+    OKC: ['#007AC1', '#EF3B24'], ORL: ['#0077C0', '#C4CED4'], PHI: ['#006BB6', '#ED174C'], PHX: ['#1D1160', '#E56020'],
+    POR: ['#E03A3E', '#000000'], SAC: ['#5A2D81', '#63727A'], SAS: ['#000000', '#C4CED4'], TOR: ['#CE1141', '#000000'],
+    WAS: ['#002B5C', '#E31837'],
+  };
+  // NBA arenas (files in backgrounds/arenas/; credits in CREDITS.md)
+  const NBA_ARENAS = [];
+  const NBA_HISTORIC = [];
+
   const mlbSelect = document.getElementById('mlb-team');
   const styleSelect = document.getElementById('team-style');
-  Object.entries(MLB_TEAMS).forEach(([abbr, name]) => mlbSelect.add(new Option(name, abbr)));
 
-  // Style choices for a team: the three MLB styles plus any team-specific extras
+  // Style choices for a team: the sport's logo styles plus any team-specific extras
   function fillStyles(abbr) {
     const keep = styleSelect.value;
+    const c = sportCfg();
     styleSelect.innerHTML = '';
-    TEAM_STYLES.forEach(([id, name]) => styleSelect.add(new Option(name, id)));
-    (TEAM_EXTRAS[abbr] || []).forEach((e) => styleSelect.add(new Option(e.name, e.id)));
+    c.styles.forEach(([id, name]) => styleSelect.add(new Option(name, id)));
+    (c.extras[abbr] || []).forEach((e) => styleSelect.add(new Option(e.name, e.id)));
     styleSelect.value = [...styleSelect.options].some((o) => o.value === keep) ? keep : 'primary';
     styleSelect.disabled = !abbr;
   }
@@ -1936,27 +2002,28 @@ input[type="range"] { width: 100%; accent-color: var(--focus); }
     fillStyles(abbr);
     if (!abbr) { logo.set(null); return; }
     const style = styleSelect.value;
-    const extra = (TEAM_EXTRAS[abbr] || []).find((e) => e.id === style);
-    const label = extra ? extra.name : TEAM_STYLES.find(([id]) => id === style)[1];
+    const c = sportCfg();
+    const extra = (c.extras[abbr] || []).find((e) => e.id === style);
+    const label = extra ? extra.name : c.styles.find(([id]) => id === style)[1];
     const nameEl = document.getElementById('logo-name');
     nameEl.textContent = 'Loading…';
     try {
       let img;
       if (extra) {
         if (/\.svg$/i.test(extra.file)) {
-          const res = await fetch(`logos/mlb/${extra.file}`);
+          const res = await fetch(`${c.logoDir}/${extra.file}`);
           if (!res.ok) throw new Error(res.status);
           img = await loadImage(svgDataUrl(await res.text(), 1200));
         } else {
-          img = await loadImage(`logos/mlb/${extra.file}`);
+          img = await loadImage(`${c.logoDir}/${extra.file}`);
         }
       } else {
-        const res = await fetch(`logos/mlb/${style}/${abbr}.svg`);
+        const res = await fetch(`${c.logoDir}/${style}/${abbr}.svg`);
         if (!res.ok) throw new Error(res.status);
         img = await loadImage(svgDataUrl(await res.text(), 1200));
       }
       if (mlbSelect.value !== abbr || styleSelect.value !== style) return; // changed while loading
-      logo.set(prepareLogo(img), `${MLB_TEAMS[abbr]}${style === 'primary' ? '' : ' ' + label} logo`);
+      logo.set(prepareLogo(img), `${c.teams[abbr]}${style === 'primary' ? '' : ' ' + label} logo`);
     } catch (e) {
       nameEl.textContent = 'Could not load that logo (open the site, not the file)';
     }
@@ -2189,8 +2256,16 @@ input[type="range"] { width: 100%; accent-color: var(--focus); }
       .then(() => window.print());
   });
 
+  // Switching sport: rebuild the lists; a team logo or stadium from the other sport is cleared
+  form.querySelectorAll('input[name="sport"]').forEach((r) => r.addEventListener('change', () => {
+    const hadTeam = !!mlbSelect.value, hadStadium = !!stadiumPick.value;
+    applySport();
+    if (hadTeam) logo.set(null);
+    if (hadStadium) bg.set(null);
+    update();
+  }));
+
   // ---------- init ----------
-  fillStadiums();
   const saved = load();
   writeForm(saved || DEFAULTS);
   doubleBox.checked = !!(saved && saved.double);
@@ -2198,7 +2273,7 @@ input[type="range"] { width: 100%; accent-color: var(--focus); }
   backRadios.forEach((r) => { r.checked = r.value === ((saved && saved.backMode) || 'same'); });
   if (saved && saved.logoDataUrl) logo.set(saved.logoDataUrl, saved.logoFileName);
   // A saved stadium is reloaded from its file so updated photos show up; uploads come from storage
-  if (saved && saved.stadium && STADIUMS.concat(HISTORIC_PARKS).some((s) => stadiumId(s) === saved.stadium)) loadStadium(false);
+  if (saved && saved.stadium && venues().some((s) => stadiumId(s) === saved.stadium)) loadStadium(false);
   else if (saved && saved.bgDataUrl) bg.set(saved.bgDataUrl, saved.bgFileName);
   if (saved && saved.brandDataUrl) brand.set(saved.brandDataUrl, saved.brandFileName);
 
