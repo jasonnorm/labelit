@@ -237,6 +237,9 @@ input[type="range"] { width: 100%; accent-color: var(--focus); }
 .section-body .field { margin-bottom: 12px; }
 .section-body .logo-row { margin-bottom: 12px; }
 .caps-check { align-self: end; padding-bottom: 8px; }
+.nudge { display: flex; gap: 8px; align-items: center; }
+.nudge .btn-secondary { padding: 6px 12px; font-size: 0.875rem; }
+#text-offset-out { color: var(--muted); font-weight: 400; margin-left: 6px; font-variant-numeric: tabular-nums; }
 /* Clickable mini-label for choosing a logo position */
 .pos-current { color: var(--muted); font-weight: 400; margin-left: 6px; }
 .pos-map {
@@ -380,6 +383,15 @@ input[type="range"] { width: 100%; accent-color: var(--focus); }
               <input name="fontScale" type="range" min="50" max="100" step="5" value="75" aria-describedby="font-size-hint" />
             </label>
             <p class="hint" id="font-size-hint">Long text still shrinks automatically to fit.</p>
+            <div class="field">
+              <span>Vertical position <output id="text-offset-out">Centered</output></span>
+              <input type="hidden" name="textOffset" value="0" />
+              <div class="nudge" role="group" aria-label="Move text up or down">
+                <button type="button" class="btn-secondary" data-nudge="-1" aria-label="Move text up">▲ Up</button>
+                <button type="button" class="btn-secondary" data-nudge="1" aria-label="Move text down">▼ Down</button>
+                <button type="button" class="btn-ghost" data-nudge="0">Center</button>
+              </div>
+            </div>
             <div class="row-2">
               <div class="field">
                 <span>Weight</span>
@@ -1182,7 +1194,8 @@ input[type="range"] { width: 100%; accent-color: var(--focus); }
     // white panel, or in the space above the logo when one is shown.
     const step = (b1 - b0) * (size / SPEC.fontSize);
     const capHeight = size * 0.716; // Arimo/Arial cap height ratio
-    const mid = (areaTop + areaBottom) / 2 + capHeight / 2;
+    // textOffset (inches, + = down) nudges the whole text block; side logos follow it
+    const mid = (areaTop + areaBottom) / 2 + capHeight / 2 + (Number(data.textOffset) || 0);
     const baselines = [mid - step, mid, mid + step];
 
     // Left/right logos line up with the text block (which moves when items sit on the borders),
@@ -1266,6 +1279,7 @@ input[type="range"] { width: 100%; accent-color: var(--focus); }
   const DPI = 600;
   const STORAGE_KEY = 'labelit:v1';
   const DEFAULTS = {
+    textOffset: 0,
     sport: 'mlb',
     yearSet: '2026 Topps Chrome',
     player: 'Shohei Ohtani',
@@ -1341,6 +1355,7 @@ input[type="range"] { width: 100%; accent-color: var(--focus); }
       allCaps: el.allCaps.checked,
       fontWeight: Number(el.fontWeight.value) || 400,
       fontScale: Number(el.fontScale.value) / 100,
+      textOffset: Number(el.textOffset.value) || 0,
       logoScale: Number(el.logoScale.value) / 100,
       logoPos: el.logoPos.value || 'center',
       bgOpacity: Number(el.bgOpacity.value) / 100,
@@ -1357,6 +1372,7 @@ input[type="range"] { width: 100%; accent-color: var(--focus); }
     applySport();
     ['yearSet', 'player', 'parallel', 'cardNo', 'serial', 'qrUrl'].forEach((k) => { el[k].value = s[k] || ''; });
     el.allCaps.checked = s.allCaps !== false;
+    el.textOffset.value = Number(s.textOffset) || 0;
     el.fontWeight.value = String(s.fontWeight || 400);
     el.fontScale.value = s.fontScale ? (s.fontScale <= 1 ? s.fontScale * 100 : s.fontScale) : 75;
     el.logoScale.value = s.logoScale ? (s.logoScale <= 2 ? s.logoScale * 100 : s.logoScale) : 100;
@@ -1414,7 +1430,37 @@ input[type="range"] { width: 100%; accent-color: var(--focus); }
     } catch (e) { return null; }
   }
 
+  // Text nudge: each step is 0.004" (about one pixel of the on-screen preview)
+  const NUDGE_STEP = 0.004;
+  function syncTextOffset() {
+    const v = Number(form.elements.textOffset.value) || 0;
+    const steps = Math.round(v / NUDGE_STEP);
+    document.getElementById('text-offset-out').textContent =
+      steps === 0 ? 'Centered' : `${Math.abs(steps)} ${steps < 0 ? 'up' : 'down'}`;
+  }
+  function nudge(dir) {
+    const el = form.elements.textOffset;
+    const v = dir === 0 ? 0 : (Number(el.value) || 0) + dir * NUDGE_STEP;
+    el.value = Math.max(-0.3, Math.min(0.3, Math.round(v / NUDGE_STEP) * NUDGE_STEP)).toFixed(3);
+    syncTextOffset();
+    update();
+  }
+  document.querySelectorAll('[data-nudge]').forEach((b) => {
+    const dir = Number(b.dataset.nudge);
+    let delay, repeat;
+    const stop = () => { clearTimeout(delay); clearInterval(repeat); };
+    b.addEventListener('pointerdown', (e) => {
+      if (e.button !== 0) return;
+      nudge(dir);
+      if (dir !== 0) delay = setTimeout(() => { repeat = setInterval(() => nudge(dir), 60); }, 400);
+    });
+    ['pointerup', 'pointerleave', 'pointercancel'].forEach((ev) => b.addEventListener(ev, stop));
+    // Keyboard (Enter/Space) arrives as a click with no pointerdown
+    b.addEventListener('click', (e) => { if (e.detail === 0) nudge(dir); });
+  });
+
   function syncFontSizeOut() {
+    if (typeof syncTextOffset === 'function') syncTextOffset();
     if (typeof syncPosLabels === 'function') syncPosLabels();
     document.getElementById('font-size-out').textContent = form.elements.fontScale.value + '%';
     document.getElementById('logo-size-out').textContent = form.elements.logoScale.value + '%';
@@ -2181,7 +2227,8 @@ input[type="range"] { width: 100%; accent-color: var(--focus); }
     document.querySelectorAll('.pos-map').forEach((m) => { m.style.background = d.borderColor; });
     const card = [d.player, d.cardNo, d.serial].map((s) => (s || '').trim()).filter(Boolean).join(' · ');
     setSummary('card', card || 'Empty', !!card);
-    setSummary('text', `${Math.round(d.fontScale * 100)}% · ${d.fontWeight === 700 ? 'Bold' : 'Normal'}${d.allCaps ? ' · CAPS' : ''}`, false, d.textColor);
+    const nudged = Math.round((d.textOffset || 0) / 0.004);
+    setSummary('text', `${Math.round(d.fontScale * 100)}% · ${d.fontWeight === 700 ? 'Bold' : 'Normal'}${d.allCaps ? ' · CAPS' : ''}${nudged ? ` · ${Math.abs(nudged)} ${nudged < 0 ? 'up' : 'down'}` : ''}`, false, d.textColor);
     setSummary('border', `${d.borderColor}${d.matchTeam && logo.img ? ' · team' : ''} · ${d.border.toFixed(3)}″`, false, d.borderColor);
     setSummary('bg', bg.img ? `${bg.name} · ${Math.round(d.bgOpacity * 100)}%` : 'Off', !!bg.img);
     setSummary('team', logo.img ? `${stripLogo(logo.name)} · ${POS_LABEL[d.logoPos]}` : 'Off', !!logo.img);
