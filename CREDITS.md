@@ -174,6 +174,8 @@ Stadium backgrounds in `backgrounds/nfl/` (current) and `backgrounds/nfl/histori
 
 ## Logos
 
+City Connect logos in `logos/mlb/cityconnect/` are made from the City Connect cap logos (and the Pirates' sleeve patch) on [Chris Creamer's SportsLogos.Net](https://www.sportslogos.net/), cropped into same-size circular patches in each cap's color. They are trademarks of their respective clubs and Major League Baseball.
+
 Vintage team logos in `logos/mlb/vintage/` come from Wikimedia Commons, where they are marked public domain (mostly PD-textlogo / expired copyright); four cap logos had their square cap background removed. Like all team logos, they remain trademarks.
 
 NFL team logos (`logos/nfl/`) are trademarks of their respective teams and the NFL, from nfl.com. Vintage NFL logos and wordmarks in `logos/nfl/vintage/` come from Wikimedia Commons, where they are marked public domain.

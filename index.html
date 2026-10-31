@@ -486,7 +486,7 @@ input[type="range"] { width: 100%; accent-color: var(--focus); }
                 <label><input type="radio" name="teamShade" value="primary" checked /><span>Primary</span></label>
                 <label><input type="radio" name="teamShade" value="secondary" /><span>Secondary</span></label>
               </div>
-              <p class="hint" id="match-team-hint">Uses the team's colors for MLB logos, or the main colors of an uploaded logo. Picking a color above turns this off.</p>
+              <p class="hint" id="match-team-hint">Uses the team's colors (a City Connect logo uses that design's colors), or the main colors of an uploaded logo. Picking a color above turns this off.</p>
             </div>
             <label class="field size-field">
               <span>Thickness <output id="border-out">0.080″</output></span>
@@ -605,7 +605,7 @@ input[type="range"] { width: 100%; accent-color: var(--focus); }
                 </select>
               </label>
             </div>
-            <p class="hint">★ = a vintage logo is available: pick the team, then choose Vintage in Logo style. Click a spot on the label to place the logo. Blank margins and white backgrounds are trimmed automatically.</p>
+            <p class="hint">★ = a vintage logo is available: pick the team, then choose Vintage in Logo style. MLB teams also have their City Connect patches there. Click a spot on the label to place the logo. Blank margins and white backgrounds are trimmed automatically.</p>
           </div>
         </details>
         <details class="section" id="sec-set" data-section="set">
@@ -2025,7 +2025,10 @@ input[type="range"] { width: 100%; accent-color: var(--focus); }
     const box = document.querySelector('.match-team');
     box.classList.toggle('disabled', !el.matchTeam.checked);
     if (!el.matchTeam.checked || !logo.img) return;
-    const colors = sportCfg().colors[el.mlbTeam.value] || logoColors(logo.img);
+    // A logo style with its own palette (City Connect) wins over the team's usual colors
+    const c = sportCfg();
+    const extra = (c.extras[el.mlbTeam.value] || []).find((e) => e.id === el.teamStyle.value);
+    const colors = (extra && extra.colors) || c.colors[el.mlbTeam.value] || logoColors(logo.img);
     if (!colors) return;
     borderColor.set(colors[el.teamShade.value === 'secondary' ? 1 : 0]);
   }
@@ -2088,6 +2091,48 @@ input[type="range"] { width: 100%; accent-color: var(--focus); }
     TEX: [{ id: 'vintage', name: "Vintage (1994\u20132002)", file: 'vintage/TEX.png' }],
     WSH: [{ id: 'vintage', name: "Vintage (Montreal Expos, 1992\u20132004)", file: 'vintage/WSH.svg' }],
   };
+  // City Connect cap logos as same-size circular patches (files in logos/mlb/cityconnect/<TEAM>-<year>.png,
+  // art from SportsLogos.net), newest design first: [year, primary, secondary]. Each design's own
+  // colors are used by "Match team logo color". The A's and Yankees have no City Connect uniform.
+  const CITY_CONNECT = {
+    ARI: [['2025', '#513077', '#0096A8'], ['2021', '#D2BB8C', '#000000']],
+    ATL: [['2026', '#92C1E9', '#0E286F'], ['2023', '#34489D', '#C8102E']],
+    BAL: [['2026', '#000000', '#DE4500'], ['2023', '#000000', '#FFFFFF']],
+    BOS: [['2025', '#5A8D84', '#FFFFFF'], ['2021', '#2F7EE2', '#FDD000']],
+    CHC: [['2021', '#13294B', '#7AA3DB']],
+    CIN: [['2023', '#000000', '#EE293A']],
+    CLE: [['2024', '#10274B', '#751B2B']],
+    COL: [['2025', '#7AA3DB', '#6F4A9E'], ['2022', '#1D3C34', '#5D8AB4']],
+    CWS: [['2025', '#D12033', '#000000'], ['2021', '#000000', '#FFFFFF']],
+    DET: [['2024', '#00173B', '#FFFFFF']],
+    HOU: [['2022', '#031D42', '#E95028']],
+    KC: [['2026', '#675985', '#2D528C'], ['2022', '#13294B', '#FFFFFF']],
+    LAA: [['2022', '#B90B2E', '#FAF5EA']],
+    LAD: [['2024', '#11284B', '#FEF6DE'], ['2021', '#001D61', '#FFFFFF']],
+    MIA: [['2025', '#000000', '#3BA1B2'], ['2021', '#2378B2', '#CD1B2D']],
+    MIL: [['2026', '#415C7A', '#FDEFB0'], ['2022', '#6BABE3', '#10274B']],
+    MIN: [['2024', '#00539D', '#FDDD00']],
+    NYM: [['2024', '#373934', '#1E191B']],
+    PHI: [['2024', '#00153A', '#159ED9']],
+    PIT: [['2023', '#F4AB2C', '#000000']],
+    SD: [['2022', '#68CCB1', '#FE3EB2']],
+    SEA: [['2023', '#203E79', '#F3AB2C']],
+    SF: [['2021', '#ED5526', '#CFD1D2']],
+    STL: [['2024', '#B90C2F', '#FFFFFF']],
+    TB: [['2024', '#000000', '#63BA47']],
+    TEX: [['2026', '#892535', '#EADECA'], ['2023', '#131722', '#F0E4CE']],
+    TOR: [['2024', '#151827', '#EC193E']],
+    WSH: [['2025', '#8BA6C1', '#121D28'], ['2022', '#4D5054', '#F4C8B1']],
+  };
+  // City Connect styles go first among a team's extras (the newest keeps the plain 'cityconnect' id)
+  Object.entries(CITY_CONNECT).forEach(([abbr, designs]) => {
+    TEAM_EXTRAS[abbr] = [...designs.map(([year, primary, secondary], i) => ({
+      id: i ? `cityconnect-${year}` : 'cityconnect',
+      name: `City Connect (${year})`,
+      file: `cityconnect/${abbr}-${year}.png`,
+      colors: [primary, secondary],
+    })), ...(TEAM_EXTRAS[abbr] || [])];
+  });
   // ---------- NBA team logos (files in logos/nba/<style>/<TEAM>.svg, from cdn.nba.com) ----------
   const NBA_TEAMS = {
     ATL: 'Atlanta Hawks', BOS: 'Boston Celtics', BKN: 'Brooklyn Nets', CHA: 'Charlotte Hornets',
