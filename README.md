@@ -17,7 +17,7 @@ Custom 2.5″ × 0.75″ slab labels for Zion SlabMag cases, made in the browser
 - City Connect logos for the 28 teams that have a City Connect uniform (40 designs, both editions where a team has two), as same-size circular patches; "Match team logo color" uses each design's own primary and secondary colors
 - Logos on white backgrounds are cut out automatically, and all logos are scaled smoothly for clean edges
 - Logo position (left, top, bottom or right), auto-trimming, size and image effects
-- Manufacturer set logo picklist (28 Topps, Bowman, Panini, Upper Deck and Leaf sets) or upload, placed left, top, under the text or under the serial #
+- Manufacturer set logo picklist (29 Topps, Bowman, Panini, Upper Deck and Leaf sets) or upload, placed left, top, under the text or under the serial #
 - Rookie (RC) or HOF badge on the bottom border, in gold, silver, black or the border color
 - Background image: pick any of the 30 current MLB ballparks or 27 historic ones (Ebbets Field, Forbes Field, Tiger Stadium, the Astrodome…), or upload your own; full-width crop with an adjustable vertical position, opacity and image effects
 - Double-sided fold-over labels with a fold line, and an optional QR-code-only back
